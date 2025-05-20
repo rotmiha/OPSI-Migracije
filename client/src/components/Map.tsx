@@ -62,13 +62,25 @@ export default function Map({
 
   // Fetch Slovenia GeoJSON
   useEffect(() => {
-    fetch("https://raw.githubusercontent.com/stefanb/gurs-rpe/main/po-obcinah.json")
+    // Use more reliable URL
+    fetch("https://raw.githubusercontent.com/stefanb/gurs-rpe/master/obcine.geojson")
       .then(response => response.json())
       .then(data => {
+        console.log("Successfully loaded Slovenia GeoJSON data");
         setSloveniaGeoJson(data);
       })
       .catch(error => {
         console.error("Error fetching Slovenia GeoJSON:", error);
+        // Fallback - try alternative URL
+        fetch("https://geo.stat.si/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=OB_SKTE_2019&outputFormat=application/json")
+          .then(response => response.json())
+          .then(data => {
+            console.log("Successfully loaded fallback Slovenia GeoJSON data");
+            setSloveniaGeoJson(data);
+          })
+          .catch(fallbackError => {
+            console.error("Error fetching fallback Slovenia GeoJSON:", fallbackError);
+          });
       });
   }, []);
 

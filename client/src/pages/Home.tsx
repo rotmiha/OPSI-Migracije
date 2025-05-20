@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ControlPanel from "@/components/ControlPanel";
 import Map from "@/components/Map";
+import DataVisualization from "@/components/DataVisualization";
 import { ParameterGroup } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 
@@ -109,28 +110,44 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
-      <ControlPanel 
-        parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
-        availableYears={availableYears}
-        selectedGroupId={selectedGroupId}
-        selectedParameter={selectedParameter}
-        selectedParameterName={selectedParameterName}
-        selectedYear={selectedYear}
-        stats={municipalityData?.stats}
-        onGroupChange={handleGroupChange}
-        onParameterChange={handleParameterChange}
-        onYearChange={handleYearChange}
-        isLoading={isLoadingData}
-      />
-      <Map 
-        data={municipalityData?.data || []}
-        stats={municipalityData?.stats}
-        selectedParameter={selectedParameterName}
-        selectedYear={selectedYear}
-        isLoading={isLoadingData || isLoadingParameters}
-        isError={isErrorData}
-      />
+    <div className="flex flex-col h-screen overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-grow overflow-hidden">
+        <ControlPanel 
+          parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
+          availableYears={availableYears}
+          selectedGroupId={selectedGroupId}
+          selectedParameter={selectedParameter}
+          selectedParameterName={selectedParameterName}
+          selectedYear={selectedYear}
+          stats={municipalityData?.stats}
+          onGroupChange={handleGroupChange}
+          onParameterChange={handleParameterChange}
+          onYearChange={handleYearChange}
+          isLoading={isLoadingData}
+        />
+        <div className="flex-grow flex flex-col overflow-hidden">
+          <Map 
+            data={municipalityData?.data || []}
+            stats={municipalityData?.stats}
+            selectedParameter={selectedParameterName}
+            selectedYear={selectedYear}
+            isLoading={isLoadingData || isLoadingParameters}
+            isError={isErrorData}
+          />
+          
+          {/* Data visualization outside of map */}
+          {municipalityData && !isLoadingData && (
+            <div className="h-80 overflow-y-auto border-t border-neutral-light">
+              <DataVisualization 
+                data={municipalityData.data}
+                parameterName={selectedParameterName}
+                year={selectedYear}
+                stats={municipalityData.stats}
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
