@@ -29,7 +29,17 @@ export default function Home() {
     isLoading: isLoadingData,
     isError: isErrorData
   } = useQuery({
-    queryKey: ['/api/data', { parameter: selectedParameter, year: selectedYear }],
+    queryKey: ['/api/data', selectedParameter, selectedYear],
+    queryFn: async ({ queryKey }) => {
+      const [_, parameter, year] = queryKey;
+      if (!parameter || !year) return null;
+      
+      const response = await fetch(`/api/data?parameter=${encodeURIComponent(parameter)}&year=${year}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      return response.json();
+    },
     enabled: !!selectedParameter && !!selectedYear,
   });
 
