@@ -60,96 +60,28 @@ export default function Map({
   const [searchTerm, setSearchTerm] = useState("");
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
 
-  // Static GeoJSON data for Slovenia municipalities
-  useEffect(() => {
-    // Wait for 1 second to ensure other components have loaded
-    const timer = setTimeout(() => {
-      // Create a hard-coded simplified dataset for Slovenian municipalities
-      // This is a minimal example with just a few municipalities for testing
-      const dummyGeoJson = {
-        "type": "FeatureCollection",
-        "features": [
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "1",
-              "OB_UIME": "Ljubljana",
-              "OB_SIFRA": "61"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[14.5, 46.05], [14.55, 46.05], [14.55, 46.1], [14.5, 46.1], [14.5, 46.05]]]
+    useEffect(() => {
+      const timer = setTimeout(() => {
+
+        fetch("/data/obcinepodatki.json")
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("Failed to load GeoJSON data");
             }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "2",
-              "OB_UIME": "Maribor",
-              "OB_SIFRA": "70"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[15.6, 46.55], [15.7, 46.55], [15.7, 46.65], [15.6, 46.65], [15.6, 46.55]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "3",
-              "OB_UIME": "Celje",
-              "OB_SIFRA": "11"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[15.25, 46.22], [15.3, 46.22], [15.3, 46.27], [15.25, 46.27], [15.25, 46.22]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "4",
-              "OB_UIME": "Koper",
-              "OB_SIFRA": "50"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[13.7, 45.52], [13.8, 45.52], [13.8, 45.62], [13.7, 45.62], [13.7, 45.52]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "5",
-              "OB_UIME": "Kranj",
-              "OB_SIFRA": "52"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[14.33, 46.22], [14.43, 46.22], [14.43, 46.32], [14.33, 46.32], [14.33, 46.22]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "6",
-              "OB_UIME": "ajdovščina",
-              "OB_SIFRA": "1"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[13.85, 45.85], [14.0, 45.85], [14.0, 46.0], [13.85, 46.0], [13.85, 45.85]]]
-            }
-          }
-        ]
-      };
+            return response.json();
+          })
+          .then(data => {
+            console.log("Loaded Slovenia GeoJSON data from file");
+            setSloveniaGeoJson(data);
+          })
+          .catch(error => {
+            console.error("Error loading GeoJSON:", error);
+          });
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }, []);
       
-      console.log("Using local Slovenia GeoJSON data");
-      setSloveniaGeoJson(dummyGeoJson);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   // Set style for each municipality
   const style = (feature: any) => {

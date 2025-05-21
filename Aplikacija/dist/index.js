@@ -359,12 +359,17 @@ function serveStatic(app2) {
 }
 
 // server/index.ts
+import path4 from "path";
+import { fileURLToPath } from "url";
 var app = express2();
 app.use(express2.json());
 app.use(express2.urlencoded({ extended: false }));
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = path4.dirname(__filename);
+app.use(express2.static(path4.join(__dirname, "public")));
 app.use((req, res, next) => {
   const start = Date.now();
-  const path4 = req.path;
+  const path5 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
@@ -373,8 +378,8 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path4.startsWith("/api")) {
-      let logLine = `${req.method} ${path4} ${res.statusCode} in ${duration}ms`;
+    if (path5.startsWith("/api")) {
+      let logLine = `${req.method} ${path5} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }

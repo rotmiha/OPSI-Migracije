@@ -48,7 +48,7 @@ export default function MunicipalityDetail({
   };
   
   return (
-    <div className="absolute right-6 bottom-6 w-80 bg-white rounded-lg shadow-lg border border-neutral-light overflow-hidden">
+    <div className="absolute right-6 bottom-6 w-80 bg-white rounded-lg shadow-lg border border-neutral-light overflow-hidden" style={{ zIndex: 10000 }}>
       <div className="p-4">
         <div className="flex justify-between items-start">
           <div>
