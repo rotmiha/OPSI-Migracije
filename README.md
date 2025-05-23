@@ -162,6 +162,26 @@ Ta projekt je licenciran pod MIT licenco - glej [LICENSE](LICENSE) datoteko za p
 - Odpri issue na GitHub repozitoriju
 - Kontaktiraj razvojno ekipo
 
+## 📚 Viri
+
+- [Delovne migracije – izbrani kazalniki, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs0772750s)  
+  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+
+- [Bruto prejeti dohodek prebivalcev, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs0883205s)  
+  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+
+- [Selitveno gibanje prebivalstva, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs05i2002s)  
+  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+
+- [Prebivalstvo, staro 15 ali več let, po izobrazbi, občine in naselja, Slovenija, letno](https://podatki.gov.si/dataset/surs05g2018s)  
+  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+
+- [Skupni prirast prebivalstva, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs05i3002s)  
+  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+
+- [Delovno aktivno prebivalstvo – izbrani kazalniki, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs0772815s)  
+  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+
 ---
 
 **Razvito z ❤️ za Slovenijo** 🇸🇮
