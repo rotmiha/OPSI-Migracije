@@ -60,95 +60,17 @@ export default function Map({
   const [searchTerm, setSearchTerm] = useState("");
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
 
-  // Static GeoJSON data for Slovenia municipalities
+  // Fetch Slovenia GeoJSON from backend
   useEffect(() => {
-    // Wait for 1 second to ensure other components have loaded
-    const timer = setTimeout(() => {
-      // Create a hard-coded simplified dataset for Slovenian municipalities
-      // This is a minimal example with just a few municipalities for testing
-      const dummyGeoJson = {
-        "type": "FeatureCollection",
-        "features": [
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "1",
-              "OB_UIME": "Ljubljana",
-              "OB_SIFRA": "61"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[14.5, 46.05], [14.55, 46.05], [14.55, 46.1], [14.5, 46.1], [14.5, 46.05]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "2",
-              "OB_UIME": "Maribor",
-              "OB_SIFRA": "70"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[15.6, 46.55], [15.7, 46.55], [15.7, 46.65], [15.6, 46.65], [15.6, 46.55]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "3",
-              "OB_UIME": "Celje",
-              "OB_SIFRA": "11"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[15.25, 46.22], [15.3, 46.22], [15.3, 46.27], [15.25, 46.27], [15.25, 46.22]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "4",
-              "OB_UIME": "Koper",
-              "OB_SIFRA": "50"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[13.7, 45.52], [13.8, 45.52], [13.8, 45.62], [13.7, 45.62], [13.7, 45.52]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "5",
-              "OB_UIME": "Kranj",
-              "OB_SIFRA": "52"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[14.33, 46.22], [14.43, 46.22], [14.43, 46.32], [14.33, 46.32], [14.33, 46.22]]]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "OB_ID": "6",
-              "OB_UIME": "ajdovščina",
-              "OB_SIFRA": "1"
-            },
-            "geometry": {
-              "type": "Polygon",
-              "coordinates": [[[13.85, 45.85], [14.0, 45.85], [14.0, 46.0], [13.85, 46.0], [13.85, 45.85]]]
-            }
-          }
-        ]
-      };
-      
-      console.log("Using local Slovenia GeoJSON data");
-      setSloveniaGeoJson(dummyGeoJson);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    fetch("/api/geojson")
+      .then(response => response.json())
+      .then(data => {
+        console.log("Successfully loaded Slovenia GeoJSON data from backend");
+        setSloveniaGeoJson(data);
+      })
+      .catch(error => {
+        console.error("Error fetching Slovenia GeoJSON:", error);
+      });
   }, []);
 
   // Set style for each municipality
@@ -246,45 +168,12 @@ export default function Map({
     <div className="flex-grow flex flex-col h-full overflow-hidden">
       {/* Map Controls Toolbar */}
       <div className="bg-white border-b border-neutral-light p-3 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="p-1.5 rounded-md hover:bg-neutral-lighter" 
-            title="Zoom In"
-            onClick={() => {
-              const mapElement = document.querySelector(".leaflet-container");
-              if (mapElement) {
-                const map = (mapElement as any)._leaflet_map;
-                if (map) map.zoomIn();
-              }
-            }}
-          >
-            <Plus className="w-5 h-5 text-neutral-dark" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="p-1.5 rounded-md hover:bg-neutral-lighter" 
-            title="Zoom Out"
-            onClick={() => {
-              const mapElement = document.querySelector(".leaflet-container");
-              if (mapElement) {
-                const map = (mapElement as any)._leaflet_map;
-                if (map) map.zoomOut();
-              }
-            }}
-          >
-            <Minus className="w-5 h-5 text-neutral-dark" />
-          </Button>
-        </div>
-        
-        <form onSubmit={handleSearch} className="flex items-center">
-          <div className="relative">
+        <form onSubmit={handleSearch} className="flex items-center w-full max-w-md">
+          <div className="relative w-full">
             <Input 
               type="text" 
               placeholder="Išči občino..." 
-              className="w-64 px-3 py-1.5 pr-8"
+              className="w-full px-3 py-1.5 pr-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -298,40 +187,6 @@ export default function Map({
             </Button>
           </div>
         </form>
-        
-        <div className="flex items-center">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="inline-flex items-center px-3 py-1.5"
-          >
-            <Menu className="w-4 h-4 mr-1 text-neutral-dark" />
-            Filtri
-          </Button>
-          
-          <div className="ml-2 flex">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="p-1.5 rounded-md hover:bg-neutral-lighter" 
-              title="Full Screen"
-              onClick={() => {
-                const mapContainer = document.querySelector(".leaflet-container");
-                if (mapContainer && document.fullscreenEnabled) {
-                  if (!document.fullscreenElement) {
-                    mapContainer.requestFullscreen().catch(err => {
-                      console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-                    });
-                  } else {
-                    document.exitFullscreen();
-                  }
-                }
-              }}
-            >
-              <Maximize className="w-5 h-5 text-neutral-dark" />
-            </Button>
-          </div>
-        </div>
       </div>
 
       {/* Map Container */}

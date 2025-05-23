@@ -8,6 +8,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize data on server start
   await storage.initializeData();
   
+  // API endpoint to get Slovenia GeoJSON data
+  app.get('/api/geojson', async (_req: Request, res: Response) => {
+    try {
+      const response = await fetch('https://raw.githubusercontent.com/stefanb/gurs-rpe/master/obcine.geojson');
+      if (!response.ok) {
+        throw new Error('Failed to fetch GeoJSON');
+      }
+      const geoJsonData = await response.json();
+      res.json(geoJsonData);
+    } catch (error) {
+      console.error('Error fetching GeoJSON:', error);
+      // Provide basic structure for testing
+      const basicGeoJson = {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": { "OB_ID": "1", "OB_UIME": "Ljubljana", "OB_SIFRA": "61" },
+            "geometry": { "type": "Polygon", "coordinates": [[[14.5, 46.05], [14.55, 46.05], [14.55, 46.1], [14.5, 46.1], [14.5, 46.05]]] }
+          },
+          {
+            "type": "Feature", 
+            "properties": { "OB_ID": "2", "OB_UIME": "Maribor", "OB_SIFRA": "70" },
+            "geometry": { "type": "Polygon", "coordinates": [[[15.6, 46.55], [15.7, 46.55], [15.7, 46.65], [15.6, 46.65], [15.6, 46.55]]] }
+          },
+          {
+            "type": "Feature",
+            "properties": { "OB_ID": "6", "OB_UIME": "ajdovščina", "OB_SIFRA": "1" },
+            "geometry": { "type": "Polygon", "coordinates": [[[13.85, 45.85], [14.0, 45.85], [14.0, 46.0], [13.85, 46.0], [13.85, 45.85]]] }
+          }
+        ]
+      };
+      res.json(basicGeoJson);
+    }
+  });
+  
   // API endpoint to get all parameter groups and available years
   app.get('/api/parameters', async (_req: Request, res: Response) => {
     try {

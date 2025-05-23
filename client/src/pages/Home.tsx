@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import ControlPanel from "@/components/ControlPanel";
 import Map from "@/components/Map";
 import DataVisualization from "@/components/DataVisualization";
+import YearSelector from "@/components/YearSelector";
 import { ParameterGroup } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 
@@ -13,6 +14,7 @@ export default function Home() {
   const [selectedParameterName, setSelectedParameterName] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
 
   // Fetch parameters and available years
   const { 
@@ -120,21 +122,39 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-auto">
+      {/* Header with dynamic title */}
+      <div className="bg-white border-b border-neutral-light p-4 flex justify-between items-center">
+        <h1 className="text-2xl font-semibold text-neutral-darkest">
+          {selectedParameterName || "Interaktivni zemljevid Slovenije"}
+          {selectedYear && ` (${selectedYear})`}
+        </h1>
+        <button 
+          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+          className="md:hidden px-3 py-2 bg-primary text-white rounded"
+        >
+          {isSidebarVisible ? 'Skrij meni' : 'Prikaži meni'}
+        </button>
+      </div>
+
       <div className="flex flex-col md:flex-row flex-grow overflow-hidden">
-        <ControlPanel 
-          parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
-          availableYears={availableYears}
-          selectedGroupId={selectedGroupId}
-          selectedParameter={selectedParameter}
-          selectedParameterName={selectedParameterName}
-          selectedYear={selectedYear}
-          stats={municipalityData?.stats}
-          onGroupChange={handleGroupChange}
-          onParameterChange={handleParameterChange}
-          onYearChange={handleYearChange}
-          isLoading={isLoadingData}
-        />
+        {/* Sidebar with controls */}
+        <div className={`${isSidebarVisible ? 'block' : 'hidden'} md:block md:w-80 lg:w-96 border-r border-neutral-light bg-white`}>
+          <ControlPanel 
+            parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
+            availableYears={availableYears}
+            selectedGroupId={selectedGroupId}
+            selectedParameter={selectedParameter}
+            selectedParameterName={selectedParameterName}
+            selectedYear={selectedYear}
+            stats={municipalityData?.stats}
+            onGroupChange={handleGroupChange}
+            onParameterChange={handleParameterChange}
+            onYearChange={handleYearChange}
+            isLoading={isLoadingData}
+          />
+        </div>
+
         <div className="flex-grow flex flex-col overflow-hidden">
           <Map 
             data={municipalityData?.data || []}
@@ -145,9 +165,18 @@ export default function Home() {
             isError={isErrorData}
           />
           
+          {/* Year selector under map */}
+          <div className="bg-white border-t border-neutral-light p-4">
+            <YearSelector 
+              availableYears={availableYears}
+              selectedYear={selectedYear}
+              onYearChange={handleYearChange}
+            />
+          </div>
+          
           {/* Data visualization outside of map */}
           {municipalityData && !isLoadingData && (
-            <div className="h-80 overflow-y-auto border-t border-neutral-light">
+            <div className="flex-shrink-0 max-h-96 overflow-y-auto border-t border-neutral-light">
               <DataVisualization 
                 data={municipalityData.data}
                 parameterName={selectedParameterName}

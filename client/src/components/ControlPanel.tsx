@@ -84,19 +84,7 @@ export default function ControlPanel({
         )}
       </div>
       
-      {/* Footer with Actions */}
-      <div className="pt-4 border-t border-neutral-light mt-4">
-        <div className="flex justify-between">
-          <button className="inline-flex items-center px-3 py-2 text-sm font-medium text-neutral-dark hover:text-primary">
-            <Info className="w-4 h-4 mr-1" />
-            Pomoč
-          </button>
-          <button className="inline-flex items-center px-3 py-2 text-sm font-medium text-primary bg-primary-light rounded-md hover:bg-blue-100">
-            <Download className="w-4 h-4 mr-1" />
-            Izvozi podatke
-          </button>
-        </div>
-      </div>
+
     </div>
   );
 }
