@@ -167,9 +167,9 @@ export default function Map({
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex-grow flex flex-col h-full overflow-hidden">
       {/* Map Controls Toolbar */}
-      <div className="bg-white border-b border-neutral-light p-3 flex justify-between items-center z-30 relative">
+      <div className="bg-white border-b border-neutral-light p-3 flex justify-between items-center">
         <form onSubmit={handleSearch} className="flex items-center w-full max-w-md">
           <div className="relative w-full">
             <Input 
@@ -191,8 +191,8 @@ export default function Map({
         </form>
       </div>
 
-      {/* Map Container - Full size with scrollable interaction */}
-      <div className="relative flex-grow bg-neutral-lighter" style={{ touchAction: 'auto' }}>
+      {/* Map Container */}
+      <div className="relative flex-grow bg-neutral-lighter overflow-hidden">
         {/* Slovenia Map */}
         {sloveniaGeoJson ? (
           <MapContainer 
@@ -200,12 +200,6 @@ export default function Map({
             zoom={8} 
             style={{ height: "100%", width: "100%" }}
             zoomControl={false}
-            scrollWheelZoom={true}
-            doubleClickZoom={true}
-            dragging={true}
-            touchZoom={true}
-            boxZoom={true}
-            keyboard={true}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
