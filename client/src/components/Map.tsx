@@ -20,6 +20,7 @@ interface MapProps {
     median: number | null;
   } | undefined;
   selectedParameter: string;
+  selectedParameterField: string;
   selectedYear: number | null;
   isLoading: boolean;
   isError: boolean;
@@ -50,6 +51,7 @@ export default function Map({
   data, 
   stats, 
   selectedParameter, 
+  selectedParameterField,
   selectedYear, 
   isLoading, 
   isError 

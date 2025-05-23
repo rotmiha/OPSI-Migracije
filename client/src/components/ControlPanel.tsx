@@ -1,10 +1,8 @@
 import { ParameterGroup } from "@shared/schema";
 import ParameterSelector from "./ParameterSelector";
-import YearSelector from "./YearSelector";
 import ColorLegend from "./ColorLegend";
 import DataSummary from "./DataSummary";
 import { Loader2 } from "lucide-react";
-import { Info, Download } from "lucide-react";
 
 interface ControlPanelProps {
   parameterGroups: ParameterGroup[];
@@ -55,13 +53,6 @@ export default function ControlPanel({
           selectedParameterId={selectedParameter}
           onGroupChange={onGroupChange}
           onParameterChange={onParameterChange}
-        />
-        
-        {/* Year Selector */}
-        <YearSelector 
-          availableYears={availableYears}
-          selectedYear={selectedYear}
-          onYearChange={onYearChange}
         />
         
         {/* Color Legend */}

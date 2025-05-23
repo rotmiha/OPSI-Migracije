@@ -65,30 +65,30 @@ export default function DataVisualization({
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28BFF', '#FF667D', '#41D9A1', '#FFA940'];
 
   return (
-    <div className="bg-white p-4 border-t border-neutral-light">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">{parameterName} {year && `(${year})`}</h2>
-        <div className="flex gap-2">
+    <div className="bg-white p-6 border-t border-neutral-light">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+        <h2 className="text-xl font-bold mb-2 md:mb-0">{parameterName} {year && `(${year})`}</h2>
+        <div className="flex flex-wrap gap-2">
           <Button 
             variant={visualizationType === 'top' ? 'default' : 'outline'} 
             size="sm"
             onClick={() => setVisualizationType('top')}
           >
-            Najvišji
+            🏆 Najvišji
           </Button>
           <Button 
             variant={visualizationType === 'bottom' ? 'default' : 'outline'} 
             size="sm"
             onClick={() => setVisualizationType('bottom')}
           >
-            Najnižji
+            📉 Najnižji
           </Button>
           <Button 
             variant={visualizationType === 'around-median' ? 'default' : 'outline'} 
             size="sm"
             onClick={() => setVisualizationType('around-median')}
           >
-            Okoli mediane
+            📊 Okoli mediane
           </Button>
         </div>
       </div>

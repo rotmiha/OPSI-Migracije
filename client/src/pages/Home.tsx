@@ -160,6 +160,7 @@ export default function Home() {
             data={municipalityData?.data || []}
             stats={municipalityData?.stats}
             selectedParameter={selectedParameterName}
+            selectedParameterField={selectedParameter}
             selectedYear={selectedYear}
             isLoading={isLoadingData || isLoadingParameters}
             isError={isErrorData}
