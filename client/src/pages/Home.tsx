@@ -121,69 +121,107 @@ export default function Home() {
     );
   }
 
+  const [isBottomPanelVisible, setIsBottomPanelVisible] = useState<boolean>(true);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'l' || event.key === 'L') {
+        setIsSidebarVisible(!isSidebarVisible);
+      }
+      if (event.key === 'b' || event.key === 'B') {
+        setIsBottomPanelVisible(!isBottomPanelVisible);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isSidebarVisible, isBottomPanelVisible]);
+
   return (
-    <div className="flex flex-col h-screen overflow-auto">
+    <div className="min-h-screen bg-gray-50">
       {/* Header with dynamic title */}
-      <div className="bg-white border-b border-neutral-light p-4 flex justify-between items-center">
+      <div className="bg-white border-b border-neutral-light p-4 flex justify-between items-center sticky top-0 z-40">
         <h1 className="text-2xl font-semibold text-neutral-darkest">
-          {selectedParameterName || "Interaktivni zemljevid Slovenije"}
+          {selectedParameterName || ""}
           {selectedYear && ` (${selectedYear})`}
         </h1>
-        <button 
-          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-          className="md:hidden px-3 py-2 bg-primary text-white rounded"
-        >
-          {isSidebarVisible ? 'Skrij meni' : 'Prikaži meni'}
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+            className="px-3 py-2 bg-primary text-white rounded text-sm"
+            title="Skrij/prikaži levi meni (tipka L)"
+          >
+            {isSidebarVisible ? '←' : '→'}
+          </button>
+          <button 
+            onClick={() => setIsBottomPanelVisible(!isBottomPanelVisible)}
+            className="px-3 py-2 bg-secondary text-white rounded text-sm"
+            title="Skrij/prikaži spodnji meni (tipka B)"
+          >
+            {isBottomPanelVisible ? '↓' : '↑'}
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row flex-grow overflow-hidden">
+      {/* Main content area with full page scrolling */}
+      <div className="flex flex-col md:flex-row">
         {/* Sidebar with controls */}
-        <div className={`${isSidebarVisible ? 'block' : 'hidden'} md:block md:w-80 lg:w-96 border-r border-neutral-light bg-white`}>
-          <ControlPanel 
-            parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
-            availableYears={availableYears}
-            selectedGroupId={selectedGroupId}
-            selectedParameter={selectedParameter}
-            selectedParameterName={selectedParameterName}
-            selectedYear={selectedYear}
-            stats={municipalityData?.stats}
-            onGroupChange={handleGroupChange}
-            onParameterChange={handleParameterChange}
-            onYearChange={handleYearChange}
-            isLoading={isLoadingData}
-          />
-        </div>
-
-        <div className="flex-grow flex flex-col overflow-hidden">
-          <Map 
-            data={municipalityData?.data || []}
-            stats={municipalityData?.stats}
-            selectedParameter={selectedParameterName}
-            selectedParameterField={selectedParameter}
-            selectedYear={selectedYear}
-            isLoading={isLoadingData || isLoadingParameters}
-            isError={isErrorData}
-          />
-          
-          {/* Year selector under map */}
-          <div className="bg-white border-t border-neutral-light p-4">
-            <YearSelector 
+        {isSidebarVisible && (
+          <div className="w-full md:w-80 lg:w-96 border-r border-neutral-light bg-white md:sticky md:top-16 md:h-screen md:overflow-y-auto">
+            <ControlPanel 
+              parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
               availableYears={availableYears}
+              selectedGroupId={selectedGroupId}
+              selectedParameter={selectedParameter}
+              selectedParameterName={selectedParameterName}
               selectedYear={selectedYear}
+              stats={municipalityData?.stats}
+              onGroupChange={handleGroupChange}
+              onParameterChange={handleParameterChange}
               onYearChange={handleYearChange}
+              isLoading={isLoadingData}
+            />
+          </div>
+        )}
+
+        <div className="flex-grow flex flex-col">
+          {/* Enlarged map area */}
+          <div className="h-screen md:h-[80vh] lg:h-[90vh]">
+            <Map 
+              data={municipalityData?.data || []}
+              stats={municipalityData?.stats}
+              selectedParameter={selectedParameterName}
+              selectedParameterField={selectedParameter}
+              selectedYear={selectedYear}
+              isLoading={isLoadingData || isLoadingParameters}
+              isError={isErrorData}
             />
           </div>
           
-          {/* Data visualization outside of map */}
-          {municipalityData && !isLoadingData && (
-            <div className="flex-shrink-0 max-h-96 overflow-y-auto border-t border-neutral-light">
-              <DataVisualization 
-                data={municipalityData.data}
-                parameterName={selectedParameterName}
-                year={selectedYear}
-                stats={municipalityData.stats}
-              />
+          {/* Year selector and data visualization */}
+          {isBottomPanelVisible && (
+            <div className="bg-white border-t border-neutral-light">
+              {/* Year selector */}
+              <div className="p-4 border-b border-neutral-light">
+                <YearSelector 
+                  availableYears={availableYears}
+                  selectedYear={selectedYear}
+                  onYearChange={handleYearChange}
+                />
+              </div>
+              
+              {/* Data visualization */}
+              {municipalityData && !isLoadingData && (
+                <div>
+                  <DataVisualization 
+                    data={municipalityData.data}
+                    parameterName={selectedParameterName}
+                    year={selectedYear}
+                    stats={municipalityData.stats}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
