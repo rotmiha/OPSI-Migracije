@@ -53,13 +53,16 @@ export default function ParameterSelector({
           </SelectTrigger>
           <SelectContent>
             {parameterGroups.map((group) => (
-              <optgroup key={group.id} label={group.name}>
+              <div key={group.id}>
+                <div className="px-2 py-1.5 text-sm font-semibold text-gray-900 bg-gray-100">
+                  {group.name}
+                </div>
                 {group.parameters.map((parameter) => (
                   <SelectItem key={parameter.field} value={parameter.field}>
                     {parameter.name}
                   </SelectItem>
                 ))}
-              </optgroup>
+              </div>
             ))}
           </SelectContent>
         </Select>
