@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
+import { getColorForValue } from "@/lib/mapUtils";
 
 interface ColorLegendProps {
   min: number | null;
@@ -24,40 +25,53 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
     }
   }
   
+  // Generate color gradient using the same color scale as the map
+  const generateColorGradient = () => {
+    if (min === null || max === null) return [];
+    
+    const steps = 10;
+    const colors = [];
+    for (let i = 0; i < steps; i++) {
+      const value = min + (max - min) * (i / (steps - 1));
+      const color = getColorForValue(value, min, max);
+      colors.push(color);
+    }
+    return colors;
+  };
+
+  const colors = generateColorGradient();
+
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-semibold mb-3 text-neutral-darkest">Legenda</h2>
+      <h2 className="text-lg font-semibold mb-3 text-neutral-darkest">Barvna legenda</h2>
       
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex flex-col">
-          <div className="flex h-6 rounded-sm overflow-hidden">
-            <div className="w-1/9 bg-[hsl(var(--chart-1))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-2))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-3))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-4))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-5))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-6))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-7))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-8))]"></div>
-            <div className="w-1/9 bg-[hsl(var(--chart-9))]"></div>
+          {/* Color gradient bar */}
+          <div className="flex h-6 rounded-sm overflow-hidden border border-gray-200">
+            {colors.map((color, index) => (
+              <div 
+                key={index} 
+                className="flex-1" 
+                style={{ backgroundColor: color }}
+              ></div>
+            ))}
           </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-xs text-neutral-dark">{formattedMin}</span>
-            <span className="text-xs text-neutral-dark">{middle}</span>
-            <span className="text-xs text-neutral-dark">{formattedMax}</span>
+          
+          {/* Value labels */}
+          <div className="flex justify-between mt-2">
+            <span className="text-xs font-medium text-neutral-dark">{formattedMin}</span>
+            {middle && (
+              <span className="text-xs text-neutral-dark">{middle}</span>
+            )}
+            <span className="text-xs font-medium text-neutral-dark">{formattedMax}</span>
           </div>
         </div>
         
-        <div className="flex justify-between items-center mt-3">
-          <div>
-            <p className="text-sm font-medium">{parameterName}</p>
-            <p className="text-xs text-neutral-dark">Leto {year}</p>
-          </div>
-          
-          <Button variant="ghost" size="sm" className="text-xs text-primary hover:text-primary-dark">
-            Podrobnosti
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+        {/* Parameter info */}
+        <div className="bg-gray-50 p-3 rounded-md">
+          <p className="text-sm font-medium text-neutral-darkest">{parameterName}</p>
+          <p className="text-xs text-neutral-dark mt-1">Leto {year}</p>
         </div>
       </div>
     </div>
