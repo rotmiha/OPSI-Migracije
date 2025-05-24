@@ -62,18 +62,27 @@ export default function Map({
   const [searchTerm, setSearchTerm] = useState("");
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
 
-  // Fetch Slovenia GeoJSON from backend
-  useEffect(() => {
-    fetch("/api/geojson")
-      .then(response => response.json())
-      .then(data => {
-        console.log("Successfully loaded Slovenia GeoJSON data from backend");
-        setSloveniaGeoJson(data);
-      })
-      .catch(error => {
-        console.error("Error fetching Slovenia GeoJSON:", error);
-      });
-  }, []);
+useEffect(() => {
+      const timer = setTimeout(() => {
+
+        fetch("/data/obcinepodatki.json")
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("Failed to load GeoJSON data");
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log("Loaded Slovenia GeoJSON data from file");
+            setSloveniaGeoJson(data);
+          })
+          .catch(error => {
+            console.error("Error loading GeoJSON:", error);
+          });
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }, []);
 
   // Set style for each municipality
   const style = (feature: any) => {
