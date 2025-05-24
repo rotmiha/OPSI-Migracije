@@ -72,12 +72,13 @@ cd interactive-slovenia-map
 
 2. **Namesti odvisnosti**
 ```bash
-npm install
+npm install cross-env --save-dev
 ```
 
 3. **Zaženi razvojni strežnik**
 ```bash
-npm run dev
+npm run build
+npm start
 ```
 
 4. **Odpri aplikacijo**
