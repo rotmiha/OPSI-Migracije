@@ -15,6 +15,7 @@ Sodobna spletna aplikacija za vizualizacijo občinskih podatkov Slovenije z inte
 ## 🚀 Tehnologije
 
 ### Frontend
+
 - **React 18** - Moderna uporabniška knjižnica
 - **TypeScript** - Tipno varno programiranje
 - **Tailwind CSS** - Sodoben CSS framework
@@ -24,6 +25,7 @@ Sodobna spletna aplikacija za vizualizacijo občinskih podatkov Slovenije z inte
 - **Shadcn/ui** - Komponente uporabniškega vmesnika
 
 ### Backend
+
 - **Node.js** - Serversko okolje
 - **Express** - Spletni okvir
 - **TypeScript** - Tipno varno programiranje
@@ -34,6 +36,7 @@ Sodobna spletna aplikacija za vizualizacijo občinskih podatkov Slovenije z inte
 Aplikacija prikazuje različne kategorije podatkov za slovenske občine:
 
 ### Prihodki
+
 - Bruto dohodek - SKUPAJ
 - Dohodek iz dela
 - Starševski, družinski in socialni prejemki
@@ -41,17 +44,20 @@ Aplikacija prikazuje različne kategorije podatkov za slovenske občine:
 - Dohodek iz premoženja, kapitala in drugi
 
 ### Izobrazba
+
 - Izobrazba - SKUPAJ
 - Terciarna izobrazba
 - Srednješolska izobrazba
 - Osnovnošolska ali manj
 
 ### Migracije
+
 - Indeks delovne migracije
 - Indeks delovne migracije - moški
 - Indeks delovne migracije - ženske
 
 ### Zaposlitev
+
 - Delovno aktivni v občini prebivališča
 - Delovno aktivni v občini prebivališča - moški
 - Delovno aktivni v občini prebivališča - ženske
@@ -59,30 +65,34 @@ Aplikacija prikazuje različne kategorije podatkov za slovenske občine:
 ## 🛠️ Namestitev in zagn
 
 ### Predpogoji
+
 - Node.js 20 ali novejši
 - npm ali yarn
 
 ### Lokalna namestitev
 
 1. **Kloniraj repozitorij**
+
 ```bash
 git clone [URL_REPOZITORIJA]
 cd interactive-slovenia-map
 ```
 
 2. **Namesti odvisnosti**
+
 ```bash
 npm install cross-env --save-dev
 ```
 
 3. **Zaženi razvojni strežnik**
+
 ```bash
 npm run build
 npm start
 ```
 
 4. **Odpri aplikacijo**
-Pojdi na `http://localhost:5000` v spletnem brskalniku.
+   Pojdi na `http://localhost:5000` v spletnem brskalniku.
 
 ### Docker namestitev
 
@@ -118,8 +128,9 @@ Aplikacija ponuja tri vrste vizualizacij:
 3. **Tabela** - Podrobni numerični prikaz
 
 Za vsako vizualizacijo lahko izbereš:
+
 - **Najvišji** - Občine z največjimi vrednostmi
-- **Najnižji** - Občine z najmanjšimi vrednostmi  
+- **Najnižji** - Občine z najmanjšimi vrednostmi
 - **Okoli mediane** - Občine s povprečnimi vrednostmi
 
 ## 🔧 Struktura projekta
@@ -160,35 +171,53 @@ Ta projekt je licenciran pod MIT licenco - glej [LICENSE](LICENSE) datoteko za p
 ## 📞 Podpora
 
 Če imaš vprašanja ali predloge za izboljšave, prosim:
+
 - Odpri issue na GitHub repozitoriju
 - Kontaktiraj razvojno ekipo
 
 ## 📚 Viri
 
 - [Delovne migracije – izbrani kazalniki, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs0772750s)  
-  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
+
+- [Delovne migracije – občine, Slovenija, letno (nadomestna zbirka)](https://podatki.gov.si/dataset/surs0772755s)  
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
 
 - [Bruto prejeti dohodek prebivalcev, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs0883205s)  
-  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
+
+- [Bruto prejeti dohodek – občine, Slovenija, letno (nadomestna zbirka)](https://podatki.gov.si/dataset/surs0883203s)  
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
 
 - [Selitveno gibanje prebivalstva, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs05i2002s)  
-  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
+
+- [Selitveno gibanje – občine, Slovenija, letno (nadomestna zbirka)](https://podatki.gov.si/dataset/surs05i2004s)  
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
 
 - [Prebivalstvo, staro 15 ali več let, po izobrazbi, občine in naselja, Slovenija, letno](https://podatki.gov.si/dataset/surs05g2018s)  
-  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
 
 - [Skupni prirast prebivalstva, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs05i3002s)  
-  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
+
+- [Skupni prirast – občine, Slovenija, letno (nadomestna zbirka)](https://podatki.gov.si/dataset/surs05i3004s)  
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
 
 - [Delovno aktivno prebivalstvo – izbrani kazalniki, občine, Slovenija, letno](https://podatki.gov.si/dataset/surs0772815s)  
-  *Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0*
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
+
+- [Delovno aktivno prebivalstvo – občine, Slovenija, letno (nadomestna zbirka)](https://podatki.gov.si/dataset/surs0772820s)  
+  _Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0_
 
 ---
 
 **Razvito z ❤️ za Slovenijo** 🇸🇮
+
 # OPSI-Migracije
 
 # Vizualizacija in iskanje po zbirki „OPSI“
+
     Omejimo se na podatke o migraciji oseb (turistični ali za delo)
     In preseke z njimi!
     Iskanje in prikaz podatkov
