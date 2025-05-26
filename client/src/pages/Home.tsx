@@ -159,8 +159,9 @@ export default function Home() {
           </button>
           <button 
             onClick={() => setIsBottomPanelVisible(!isBottomPanelVisible)}
-            className="px-3 py-2 bg-secondary text-white rounded text-sm"
+            className="px-3 py-2 text-white rounded text-sm"
             title="Skrij/prikaži spodnji meni (tipka B)"
+            style={{ backgroundColor: isBottomPanelVisible ? '#4A90E2' : '#7F8C8D' }}
           >
             {isBottomPanelVisible ? '↓' : '↑'}
           </button>
