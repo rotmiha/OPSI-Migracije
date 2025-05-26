@@ -30,6 +30,7 @@ export default function ParameterSelector({
   // Handle parameter change
   const handleParameterSelect = (parameterId: string) => {
     const parameter = allParameters.find(param => param.field === parameterId);
+    console.log("Selected parameter:", parameter);
     if (parameter) {
       onParameterChange(parameterId, parameter.name);
     }

@@ -144,12 +144,17 @@ export default function Map({
       (item) => item.municipality.toLowerCase() === municipalityName
     );
     const value = municipalityData?.value;
-    const min = stats?.min || 0;
-    const max = stats?.max || 100;
-    let fillColor = "#f7f7f7";
+    console.log("Styling:", municipalityName, value);
+
+    const min = stats?.min ?? 0;
+    const max = stats?.max ?? 100;
+
+    let fillColor = "#f7f7f7"; // fallback fill color
+
     if (value !== null && value !== undefined) {
       fillColor = getColorForValue(value, min, max);
     }
+
     return {
       fillColor,
       weight: municipalityName === selectedMunicipality?.toLowerCase() ? 2 : 0.5,
@@ -164,12 +169,14 @@ export default function Map({
     const municipalityData = data?.find(
       (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
     );
+
+    console.log(municipalityName, municipalityData);
     const popupContent = `
       <div>
         <strong>${municipalityName}</strong>
         ${
           municipalityData && municipalityData.value !== null
-            ? `<br/>${selectedParameter}: ${municipalityData.value.toLocaleString("sl-SI")}`
+            ? `<br/>${selectedParameter}: ${municipalityData.value?.toLocaleString("sl-SI") ?? "Ni podatka"}`
             : "<br/>Ni podatka"
         }
       </div>
@@ -206,6 +213,44 @@ export default function Map({
     setSelectedMunicipality(null);
     setSelectedMunicipalityData(null);
   };
+
+  useEffect(() => {
+    if (!geoJsonLayerRef.current) return;
+
+    geoJsonLayerRef.current.eachLayer((layer: any) => {
+      const municipalityName = layer.feature.properties.OB_UIME;
+      const municipalityData = data?.find(
+        (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
+      );
+
+      const tooltipContent = `
+        <div>
+          <strong>${municipalityName}</strong>
+          ${
+            municipalityData && municipalityData.value !== null
+              ? `<br/>${selectedParameter}: ${municipalityData.value?.toLocaleString("sl-SI") ?? "Ni podatka"}`
+              : "<br/>Ni podatka"
+          }
+        </div>
+      `;
+
+      layer.unbindTooltip();
+      layer.bindTooltip(tooltipContent);
+    });
+  }, [selectedParameter, data]);
+
+
+
+  useEffect(() => {
+  if (!selectedMunicipality) return;
+
+  const updatedData = data.find(
+    (item) => item.municipality.toLowerCase() === selectedMunicipality.toLowerCase()
+  );
+
+  setSelectedMunicipalityData(updatedData);
+}, [data, selectedMunicipality]);
+
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -253,11 +298,11 @@ export default function Map({
 
           {sloveniaGeoJson && (
             <GeoJSON
-              data={sloveniaGeoJson}
-              style={style}
-              onEachFeature={onEachFeature}
-              ref={geoJsonLayerRef}
-            />
+            data={sloveniaGeoJson}
+            style={style}
+            onEachFeature={onEachFeature}
+            ref={geoJsonLayerRef}
+          />
           )}
 
           {regijeGeoJson && (
@@ -302,4 +347,7 @@ export default function Map({
       </div>
     </div>
   );
+
+
+  
 }

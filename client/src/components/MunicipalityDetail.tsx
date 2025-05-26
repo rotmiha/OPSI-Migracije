@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { X, Eye, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface MunicipalityDetailProps {
   municipalityName: string;
@@ -27,12 +28,23 @@ export default function MunicipalityDetail({
   onClose
 }: MunicipalityDetailProps) {
   // Format number with Slovenian locale
+  const monetaryParameters = [
+    "Bruto dohodek - SKUPAJ",
+    "Dohodek iz dela",
+    "Starševski, družinski in socialni prejemki",
+    "Pokojnine",
+    "Dohodek iz premoženja, kapitala in drugi",
+  ];
+  const isMonetary = monetaryParameters.includes(parameterName);
+
   const formatNumber = (value: number | null): string => {
-    if (value === null) return '-';
-    
-    return value.toLocaleString('sl-SI', {
-      maximumFractionDigits: 2
+    if (value == null) return "-";
+
+    const formatted = value.toLocaleString("sl-SI", {
+      maximumFractionDigits: 2,
     });
+
+    return isMonetary ? `${formatted} €` : formatted;
   };
   
   // Calculate percentage for progress bar
@@ -46,6 +58,25 @@ export default function MunicipalityDetail({
     
     return ((data.value - min) / (max - min)) * 100;
   };
+
+  
+  const [percentage, setPercentage] = useState(0);
+
+  useEffect(() => {
+    if (!data.value || !stats || stats.min === null || stats.max === null) {
+      setPercentage(0);
+      return;
+    }
+    const min = stats.min;
+    const max = stats.max;
+    if (max === min) {
+      setPercentage(50);
+      return;
+    }
+    setPercentage(((data.value - min) / (max - min)) * 100);
+  }, [data.value, stats]);
+
+
   
   return (
     <div className="absolute right-6 bottom-6 w-80 bg-white rounded-lg shadow-lg border border-neutral-light overflow-hidden" style={{ zIndex: 1000 }}>
@@ -68,7 +99,7 @@ export default function MunicipalityDetail({
         <div className="mt-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-neutral-dark">{parameterName} ({year})</span>
-            <span className="font-semibold">{formatNumber(data.value)}€</span>
+            <span className="font-semibold">{formatNumber(data.value)}</span>
           </div>
           
           <div className="h-2 w-full bg-neutral-lighter rounded-full overflow-hidden">
@@ -79,34 +110,14 @@ export default function MunicipalityDetail({
           </div>
           
           <div className="flex justify-between text-xs text-neutral-dark mt-1">
-            <span>{formatNumber(stats?.min)}€</span>
-            <span>{formatNumber(stats?.max)}€</span>
+            <span>{formatNumber(stats?.min)}</span>
+            <span>{formatNumber(stats?.max)}</span>
           </div>
         </div>
         
-        {/* Other related parameters - would be populated if we had related data */}
-        <div className="mt-4 space-y-3">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-neutral-dark">Povprečje</span>
-            <span className="font-medium">{formatNumber(stats?.avg)}€</span>
-          </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-neutral-dark">Mediana</span>
-            <span className="font-medium">{formatNumber(stats?.median)}€</span>
-          </div>
-        </div>
+  
       </div>
       
-      <div className="bg-neutral-lighter px-4 py-3 flex justify-between">
-        <Button variant="ghost" size="sm" className="text-sm text-neutral-dark hover:text-primary flex items-center">
-          <Eye className="w-4 h-4 mr-1" />
-          Prikaži vse podatke
-        </Button>
-        <Button variant="ghost" size="sm" className="text-sm text-primary flex items-center">
-          <ChevronRight className="w-4 h-4 mr-1" />
-          Zgodovina
-        </Button>
-      </div>
     </div>
   );
 }

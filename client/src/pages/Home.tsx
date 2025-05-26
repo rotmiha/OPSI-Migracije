@@ -190,7 +190,7 @@ export default function Home() {
 
         <div className="flex-grow flex flex-col">
           {/* Enlarged map area */}
-          <div className="h-screen md:h-[80vh] lg:h-[90vh]">
+          <div className="h-screen md:h-[60vh] lg:h-[70vh]">
             <Map 
               data={municipalityData?.data || []}
               stats={municipalityData?.stats}
