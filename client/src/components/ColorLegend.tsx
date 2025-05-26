@@ -20,7 +20,6 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
   function formatValue(value: number | null | undefined): string {
     
     if (value === null || value === undefined) {
-      console.log("najdu") 
       return '-';
     }
     if (value >= 1000) {

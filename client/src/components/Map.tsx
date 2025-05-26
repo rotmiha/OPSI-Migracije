@@ -144,7 +144,6 @@ export default function Map({
       (item) => item.municipality.toLowerCase() === municipalityName
     );
     const value = municipalityData?.value;
-    console.log("Styling:", municipalityName, value);
 
     const min = stats?.min ?? 0;
     const max = stats?.max ?? 100;
@@ -170,7 +169,6 @@ export default function Map({
       (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
     );
 
-    console.log(municipalityName, municipalityData);
     const popupContent = `
       <div>
         <strong>${municipalityName}</strong>
