@@ -1,12 +1,14 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { storageReg } from "./storageReg";
 import { dataQuerySchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize data on server start
   await storage.initializeData();
+  await storageReg.initializeData();
   
   // API endpoint to get Slovenia GeoJSON data
   app.get('/api/geojson', async (_req: Request, res: Response) => {
@@ -81,6 +83,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ message: 'Failed to fetch data' });
+    }
+  });
+
+  // API endpoint to get region data for a specific parameter and year
+  app.get('/api/data/regions', async (req: Request, res: Response) => {
+    try {
+      const queryResult = dataQuerySchema.safeParse(req.query);
+
+      if (!queryResult.success) {
+        return res.status(400).json({
+          message: 'Invalid query parameters',
+          errors: queryResult.error.errors,
+        });
+      }
+
+      const { parameter, year } = queryResult.data;
+      const data = await storageReg.getRegionData(parameter, year);
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching region data:', error);
+
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid query parameters',
+          errors: error.errors,
+        });
+      }
+
+      res.status(500).json({ message: 'Failed to fetch region data' });
     }
   });
 
