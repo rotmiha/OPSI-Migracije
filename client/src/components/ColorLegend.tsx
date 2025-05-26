@@ -15,9 +15,14 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
   const formattedMin = min !== null ? formatValue(min) : '0';
   const middle = min !== null && max !== null ? formatValue((min + max) / 2) : '';
   const formattedMax = max !== null ? formatValue(max) : '';
-  
+  console.log(max);
   // Format value based on magnitude
-  function formatValue(value: number): string {
+  function formatValue(value: number | null | undefined): string {
+    
+    if (value === null || value === undefined) {
+      console.log("najdu") 
+      return '-';
+    }
     if (value >= 1000) {
       return `${Math.round(value).toLocaleString('sl-SI')}€`;
     } else {

@@ -31,6 +31,7 @@ export default function ControlPanel({
   selectedParameterName,
   selectedYear,
   stats,
+  
   onGroupChange,
   onParameterChange,
   onYearChange,
@@ -71,7 +72,7 @@ export default function ControlPanel({
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : (
-          stats && <DataSummary stats={stats} />
+          stats && <DataSummary stats={stats} selectedParameterName={selectedParameterName} />
         )}
       </div>
       
