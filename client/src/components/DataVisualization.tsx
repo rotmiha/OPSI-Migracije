@@ -109,45 +109,51 @@ export default function DataVisualization({
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="bar" className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 120 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-              <YAxis />
-              <Tooltip formatter={(value: number) => value.toLocaleString('sl-SI')} />
-              <Legend />
-              <Bar dataKey="value" fill="#0078d4" name={parameterName} />
-            </BarChart>
-          </ResponsiveContainer>
-        </TabsContent>
-        
-        <TabsContent value="pie" className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: number) => value.toLocaleString('sl-SI')} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </TabsContent>
-        
+    <TabsContent value="bar" className="h-[500px]"> {/* Increased height */}
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={chartData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 150 }} // Increased bottom for labels
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="name" 
+            angle={-45} 
+            textAnchor="end" 
+            height={100} // Increased to give more room for angled labels
+          />
+          <YAxis />
+          <Tooltip formatter={(value: number) => value.toLocaleString('sl-SI')} />
+          <Legend />
+          <Bar dataKey="value" fill="#0078d4" name={parameterName} />
+        </BarChart>
+      </ResponsiveContainer>
+    </TabsContent>
+
+    <TabsContent value="pie" className="h-[500px]"> {/* Increased height */}
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={chartData}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+            outerRadius={120} // Increased for better visibility
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip formatter={(value: number) => value.toLocaleString('sl-SI')} />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    </TabsContent>
+
+            
         <TabsContent value="table">
           <div className="max-h-80 overflow-y-auto">
             <table className="w-full border-collapse">
