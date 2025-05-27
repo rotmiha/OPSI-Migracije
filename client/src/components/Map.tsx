@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -134,7 +134,6 @@ export default function Map({
   const [sloveniaGeoJson, setSloveniaGeoJson] = useState<any>(null);
   const [regijeGeoJson, setRegijeGeoJson] = useState<any>(null);
   const [selectedMunicipality, setSelectedMunicipality] = useState<string | null>(null);
-  const [selectedMunicipalityData, setSelectedMunicipalityData] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
 
@@ -164,6 +163,8 @@ export default function Map({
     const municipalityData = data?.find(
       (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
     );
+
+    console.log( municipalityName + " " + municipalityData)
     const popupContent = `
       <div>
         <strong>${municipalityName}</strong>
@@ -206,6 +207,42 @@ export default function Map({
     setSelectedMunicipality(null);
     setSelectedMunicipalityData(null);
   };
+
+
+  useEffect(() => {
+    if (!geoJsonLayerRef.current) return;
+
+    geoJsonLayerRef.current.eachLayer((layer: any) => {
+      const municipalityName = layer.feature.properties.OB_UIME;
+      const municipalityData = data?.find(
+        (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
+      );
+
+      const tooltipContent = `
+        <div>
+          <strong>${municipalityName}</strong>
+          ${
+            municipalityData && municipalityData.value !== null
+              ? `<br/>${selectedParameter}: ${municipalityData.value?.toLocaleString("sl-SI") ?? "Ni podatka"}`
+              : "<br/>Ni podatka"
+          }
+        </div>
+      `;
+
+      layer.unbindTooltip();
+      layer.bindTooltip(tooltipContent);
+    });
+  }, [selectedParameter, data]);
+
+
+  const selectedMunicipalityData = useMemo(() => {
+  if (!selectedMunicipality) return null;
+  return data.find(
+    (item) => item.municipality.toLowerCase() === selectedMunicipality.toLowerCase()
+  );
+}, [selectedMunicipality, data]);
+
+
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -279,7 +316,7 @@ export default function Map({
             year={selectedYear}
             stats={stats}
             onClose={handleCloseDetail}
-          />
+          /> 
         )}
 
         {isLoading && (
