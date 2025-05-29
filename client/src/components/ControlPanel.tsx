@@ -40,10 +40,6 @@ export default function ControlPanel({
   return (
     <div className="md:w-80 lg:w-96 border-r border-neutral-light bg-white p-4 flex flex-col h-full overflow-hidden">
       {/* Header Section */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-neutral-darkest">Zemljevid Slovenije</h1>
-        <p className="text-neutral-dark text-sm mt-1">Interaktivni prikaz podatkov po občinah</p>
-      </div>
 
       {/* Controls Area with scrollable content */}
       <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">

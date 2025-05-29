@@ -62,12 +62,16 @@ Aplikacija prikazuje različne kategorije podatkov za slovenske občine:
 - Delovno aktivni v občini prebivališča - moški
 - Delovno aktivni v občini prebivališča - ženske
 
-## 🛠️ Namestitev in zagn
+## 🌎 Spletni dostop
+
+#### Do online spletne strani lahko dostopate na [OPSI Migracije](https://opsi-migracije-k6v4.onrender.com)
+
+## 🛠️ Lokalna namestitev in zagon
 
 ### Predpogoji
 
 - Node.js 20 ali novejši
-- npm ali yarn
+- npm ali yarn   
 
 ### Lokalna namestitev
 

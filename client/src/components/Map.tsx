@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useEffect, useRef, useState, useCallback } from "react";
+=======
+import { useEffect, useMemo, useRef, useState } from "react";
+>>>>>>> f8951e94fbf8d1bebd1c28c3df58a98d6437459f
 import {
   MapContainer,
   TileLayer,
@@ -60,7 +64,6 @@ export default function Map({
 }: MapProps) {
   const [currentLayer, setCurrentLayer] = useState<"municipalities" | "regions" | null>(null);
   const [selectedMunicipality, setSelectedMunicipality] = useState<string | null>(null);
-  const [selectedMunicipalityData, setSelectedMunicipalityData] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sloveniaGeoJson, setSloveniaGeoJson] = useState<any>(null);
   const [regijeGeoJson, setRegijeGeoJson] = useState<any>(null);
@@ -92,12 +95,31 @@ export default function Map({
     };
   }, [data, stats, selectedMunicipality, currentLayer]);
 
+<<<<<<< HEAD
   const onEachFeature = useCallback((feature: any, layer: L.Layer) => {
     const name = getFeatureName(feature);
     const item = data?.find(d => normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === normalize(name));
     const popup = `
       <div><strong>${name}</strong><br/>
       ${item?.value != null ? `${selectedParameter}: ${item.value.toLocaleString("sl-SI")}` : "Ni podatka"}</div>
+=======
+  const onEachFeature = (feature: any, layer: L.Layer) => {
+    const municipalityName = feature.properties.OB_UIME;
+    const municipalityData = data?.find(
+      (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
+    );
+
+    console.log( municipalityName + " " + municipalityData)
+    const popupContent = `
+      <div>
+        <strong>${municipalityName}</strong>
+        ${
+          municipalityData && municipalityData.value !== null
+            ? `<br/>${selectedParameter}: ${municipalityData.value.toLocaleString("sl-SI")}`
+            : "<br/>Ni podatka"
+        }
+      </div>
+>>>>>>> f8951e94fbf8d1bebd1c28c3df58a98d6437459f
     `;
     layer.bindTooltip(popup);
 
@@ -135,6 +157,7 @@ export default function Map({
     setSelectedMunicipalityData(null);
   };
 
+<<<<<<< HEAD
   const ZoomBasedGeoJsonLoader = ({
     onLoadMunicipalities,
     onLoadRegions,
@@ -228,6 +251,43 @@ export default function Map({
       </Button>
     );
   };
+=======
+
+  useEffect(() => {
+    if (!geoJsonLayerRef.current) return;
+
+    geoJsonLayerRef.current.eachLayer((layer: any) => {
+      const municipalityName = layer.feature.properties.OB_UIME;
+      const municipalityData = data?.find(
+        (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
+      );
+
+      const tooltipContent = `
+        <div>
+          <strong>${municipalityName}</strong>
+          ${
+            municipalityData && municipalityData.value !== null
+              ? `<br/>${selectedParameter}: ${municipalityData.value?.toLocaleString("sl-SI") ?? "Ni podatka"}`
+              : "<br/>Ni podatka"
+          }
+        </div>
+      `;
+
+      layer.unbindTooltip();
+      layer.bindTooltip(tooltipContent);
+    });
+  }, [selectedParameter, data]);
+
+
+  const selectedMunicipalityData = useMemo(() => {
+  if (!selectedMunicipality) return null;
+  return data.find(
+    (item) => item.municipality.toLowerCase() === selectedMunicipality.toLowerCase()
+  );
+}, [selectedMunicipality, data]);
+
+
+>>>>>>> f8951e94fbf8d1bebd1c28c3df58a98d6437459f
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -302,7 +362,7 @@ export default function Map({
             year={selectedYear}
             stats={stats}
             onClose={handleCloseDetail}
-          />
+          /> 
         )}
 
         {isLoading && (
