@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -22,6 +22,7 @@ import { getColorForValue } from "@/lib/mapUtils";
 interface MapProps {
   data: Array<{
     municipality: string;
+    region?: string;
     value: number | null;
   }>;
   stats: {
@@ -35,92 +36,17 @@ interface MapProps {
   selectedYear: number | null;
   isLoading: boolean;
   isError: boolean;
+  onZoomChange?: (zoom: number) => void;
 }
 
-function ResetMapView() {
-  const map = useMap();
-  const handleReset = () => {
-    map.setView([46.119944, 14.815333], 8);
-  };
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="p-1.5 rounded-md bg-white hover:bg-neutral-lighter"
-      onClick={handleReset}
-      title="Reset View"
-    >
-      <RotateCcw className="w-5 h-5 text-neutral-dark" />
-    </Button>
-  );
-}
-
-function ZoomBasedGeoJsonLoader({
-  onLoadMunicipalities,
-  onUnloadMunicipalities,
-  onLoadRegions,
-  onUnloadRegions,
-}: {
-  onLoadMunicipalities: (data: any) => void;
-  onUnloadMunicipalities: () => void;
-  onLoadRegions: (data: any) => void;
-  onUnloadRegions: () => void;
-}) {
-  const previousZoom = useRef<number>(0);
-  const map = useMap();
-  const [currentLayer, setCurrentLayer] = useState<"municipalities" | "regions" | null>(null);
-
-  useEffect(() => {
-    const initialZoom = map.getZoom();
-    previousZoom.current = initialZoom;
-    if (initialZoom >= 9) {
-      fetch("/data/obcinepodatki.json")
-        .then((res) => res.json())
-        .then((data) => {
-          onLoadMunicipalities(data);
-          setCurrentLayer("municipalities");
-        });
-    } else {
-      fetch("/data/regije.json")
-        .then((res) => res.json())
-        .then((data) => {
-          onLoadRegions(data);
-          setCurrentLayer("regions");
-        });
-    }
-  }, [map]);
-
-  useMapEvents({
-    zoomend: () => {
-      const zoom = map.getZoom();
-      const prevZoom = previousZoom.current;
-
-      if (zoom < 9 && prevZoom >= 9 && currentLayer !== "regions") {
-        onUnloadMunicipalities();
-        fetch("/data/regije.json")
-          .then((res) => res.json())
-          .then((data) => {
-            onLoadRegions(data);
-            setCurrentLayer("regions");
-          });
-      }
-
-      if (zoom >= 9 && prevZoom < 9 && currentLayer !== "municipalities") {
-        onUnloadRegions();
-        fetch("/data/obcinepodatki.json")
-          .then((res) => res.json())
-          .then((data) => {
-            onLoadMunicipalities(data);
-            setCurrentLayer("municipalities");
-          });
-      }
-
-      previousZoom.current = zoom;
-    },
-  });
-
-  return null;
-}
+const normalize = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(" regija", "")
+    .replace("občina", "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim();
 
 export default function Map({
   data,
@@ -130,58 +56,60 @@ export default function Map({
   selectedYear,
   isLoading,
   isError,
+  onZoomChange,
 }: MapProps) {
-  const [sloveniaGeoJson, setSloveniaGeoJson] = useState<any>(null);
-  const [regijeGeoJson, setRegijeGeoJson] = useState<any>(null);
+  const [currentLayer, setCurrentLayer] = useState<"municipalities" | "regions" | null>(null);
   const [selectedMunicipality, setSelectedMunicipality] = useState<string | null>(null);
   const [selectedMunicipalityData, setSelectedMunicipalityData] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sloveniaGeoJson, setSloveniaGeoJson] = useState<any>(null);
+  const [regijeGeoJson, setRegijeGeoJson] = useState<any>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
+  const [loadedMunicipalities, setLoadedMunicipalities] = useState(false);
+  const [loadedRegions, setLoadedRegions] = useState(false);
 
-  const style = (feature: any) => {
-    const municipalityName = feature.properties.OB_UIME.toLowerCase();
-    const municipalityData = data?.find(
-      (item) => item.municipality.toLowerCase() === municipalityName
-    );
-    const value = municipalityData?.value;
+  const getFeatureName = (feature: any): string => {
+    if (!feature?.properties) return "";
+    if (currentLayer === "municipalities") return feature.properties.OB_UIME || "";
+    if (currentLayer === "regions") return feature.properties.SR_UIME || feature.properties.NAME_1 || "";
+    return "";
+  };
+
+  const getStyle = useCallback((feature: any) => {
+    const name = normalize(getFeatureName(feature));
+    const item = data?.find(d => normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === name);
+    const value = item?.value;
     const min = stats?.min || 0;
     const max = stats?.max || 100;
-    let fillColor = "#f7f7f7";
-    if (value !== null && value !== undefined) {
-      fillColor = getColorForValue(value, min, max);
-    }
+    const fillColor = value != null ? getColorForValue(value, min, max) : currentLayer === "municipalities" ? "#f7f7f7" : "#ececec";
+
     return {
       fillColor,
-      weight: municipalityName === selectedMunicipality?.toLowerCase() ? 2 : 0.5,
+      weight: currentLayer === "municipalities" && name === normalize(selectedMunicipality || "") ? 2 : 1,
       opacity: 1,
-      color: municipalityName === selectedMunicipality?.toLowerCase() ? "#252423" : "#ffffff",
-      fillOpacity: 0.7,
+      color: currentLayer === "municipalities" && name === normalize(selectedMunicipality || "") ? "#252423" : "#999",
+      fillOpacity: currentLayer === "municipalities" ? 0.7 : 0.6,
     };
-  };
+  }, [data, stats, selectedMunicipality, currentLayer]);
 
-  const onEachFeature = (feature: any, layer: L.Layer) => {
-    const municipalityName = feature.properties.OB_UIME;
-    const municipalityData = data?.find(
-      (item) => item.municipality.toLowerCase() === municipalityName.toLowerCase()
-    );
-    const popupContent = `
-      <div>
-        <strong>${municipalityName}</strong>
-        ${
-          municipalityData && municipalityData.value !== null
-            ? `<br/>${selectedParameter}: ${municipalityData.value.toLocaleString("sl-SI")}`
-            : "<br/>Ni podatka"
-        }
-      </div>
+  const onEachFeature = useCallback((feature: any, layer: L.Layer) => {
+    const name = getFeatureName(feature);
+    const item = data?.find(d => normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === normalize(name));
+    const popup = `
+      <div><strong>${name}</strong><br/>
+      ${item?.value != null ? `${selectedParameter}: ${item.value.toLocaleString("sl-SI")}` : "Ni podatka"}</div>
     `;
-    layer.bindTooltip(popupContent);
-    layer.on({
-      click: () => {
-        setSelectedMunicipality(municipalityName);
-        setSelectedMunicipalityData(municipalityData);
-      },
-    });
-  };
+    layer.bindTooltip(popup);
+
+    if (currentLayer === "municipalities") {
+      layer.on({
+        click: () => {
+          setSelectedMunicipality(name);
+          setSelectedMunicipalityData(item);
+        },
+      });
+    }
+  }, [data, selectedParameter, currentLayer]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,11 +118,11 @@ export default function Map({
     let found = false;
     layer.eachLayer((l: any) => {
       if (found) return;
-      const municipalityName = l.feature.properties.OB_UIME.toLowerCase();
-      if (municipalityName.includes(searchTerm.toLowerCase())) {
-        setSelectedMunicipality(l.feature.properties.OB_UIME);
+      const name = normalize(getFeatureName(l.feature));
+      if (name.includes(normalize(searchTerm))) {
+        setSelectedMunicipality(name);
         const municipalityData = data?.find(
-          (item) => item.municipality.toLowerCase() === municipalityName
+          (item) => normalize((currentLayer === "municipalities" ? item.municipality : item.region) || "") === name
         );
         setSelectedMunicipalityData(municipalityData);
         found = true;
@@ -205,6 +133,100 @@ export default function Map({
   const handleCloseDetail = () => {
     setSelectedMunicipality(null);
     setSelectedMunicipalityData(null);
+  };
+
+  const ZoomBasedGeoJsonLoader = ({
+    onLoadMunicipalities,
+    onLoadRegions,
+    onZoomChange,
+    onLayerChange,
+  }: {
+    onLoadMunicipalities: (data: any) => void;
+    onLoadRegions: (data: any) => void;
+    onZoomChange?: (zoom: number) => void;
+    onLayerChange?: (layer: "municipalities" | "regions") => void;
+  }) => {
+    const previousZoom = useRef<number>(0);
+    const map = useMap();
+
+    useEffect(() => {
+      const initialZoom = map.getZoom();
+      previousZoom.current = initialZoom;
+      if (initialZoom >= 9 && !loadedMunicipalities) {
+        fetch("/data/obcinepodatki.json")
+          .then((res) => res.json())
+          .then((data) => {
+            onLoadMunicipalities(data);
+            setLoadedMunicipalities(true);
+            setCurrentLayer("municipalities");
+            onLayerChange?.("municipalities");
+          });
+      } else if (!loadedRegions) {
+        fetch("/data/regije.json")
+          .then((res) => res.json())
+          .then((data) => {
+            onLoadRegions(data);
+            setLoadedRegions(true);
+            setCurrentLayer("regions");
+            onLayerChange?.("regions");
+          });
+      }
+    }, [map]);
+
+    useMapEvents({
+      zoomend: () => {
+        const zoom = map.getZoom();
+        if (onZoomChange) onZoomChange(zoom);
+
+        if (zoom < 9 && previousZoom.current >= 9 && currentLayer !== "regions") {
+          if (!loadedRegions) {
+            fetch("/data/regije.json")
+              .then((res) => res.json())
+              .then((data) => {
+                onLoadRegions(data);
+                setLoadedRegions(true);
+              });
+          }
+          setCurrentLayer("regions");
+          onLayerChange?.("regions");
+        }
+
+        if (zoom >= 9 && previousZoom.current < 9 && currentLayer !== "municipalities") {
+          if (!loadedMunicipalities) {
+            fetch("/data/obcinepodatki.json")
+              .then((res) => res.json())
+              .then((data) => {
+                onLoadMunicipalities(data);
+                setLoadedMunicipalities(true);
+              });
+          }
+          setCurrentLayer("municipalities");
+          onLayerChange?.("municipalities");
+        }
+
+        previousZoom.current = zoom;
+      },
+    });
+
+    return null;
+  };
+
+  const ResetMapView = () => {
+    const map = useMap();
+    const handleReset = () => {
+      map.setView([46.119944, 14.815333], 8);
+    };
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="p-1.5 rounded-md bg-white hover:bg-neutral-lighter"
+        onClick={handleReset}
+        title="Reset View"
+      >
+        <RotateCcw className="w-5 h-5 text-neutral-dark" />
+      </Button>
+    );
   };
 
   return (
@@ -246,24 +268,25 @@ export default function Map({
 
           <ZoomBasedGeoJsonLoader
             onLoadMunicipalities={setSloveniaGeoJson}
-            onUnloadMunicipalities={() => setSloveniaGeoJson(null)}
             onLoadRegions={setRegijeGeoJson}
-            onUnloadRegions={() => setRegijeGeoJson(null)}
+            onZoomChange={onZoomChange}
+            onLayerChange={setCurrentLayer}
           />
 
-          {sloveniaGeoJson && (
+          {sloveniaGeoJson && currentLayer === "municipalities" && (
             <GeoJSON
               data={sloveniaGeoJson}
-              style={style}
+              style={getStyle}
               onEachFeature={onEachFeature}
               ref={geoJsonLayerRef}
             />
           )}
 
-          {regijeGeoJson && (
+          {regijeGeoJson && currentLayer === "regions" && (
             <GeoJSON
               data={regijeGeoJson}
-              style={{ fillColor: "#dcdcdc", color: "#555", weight: 1, fillOpacity: 0.5 }}
+              style={getStyle}
+              onEachFeature={onEachFeature}
             />
           )}
 
@@ -271,7 +294,7 @@ export default function Map({
           <ResetMapView />
         </MapContainer>
 
-        {selectedMunicipality && selectedMunicipalityData && (
+        {currentLayer === "municipalities" && selectedMunicipality && selectedMunicipalityData && (
           <MunicipalityDetail
             municipalityName={selectedMunicipality}
             data={selectedMunicipalityData}

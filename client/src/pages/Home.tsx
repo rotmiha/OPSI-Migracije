@@ -16,6 +16,7 @@ export default function Home() {
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isBottomPanelVisible, setIsBottomPanelVisible] = useState<boolean>(true);
+  const [currentZoomLevel, setCurrentZoomLevel] = useState<number>(8);
 
   // Fetch parameters and available years
   const { 
@@ -27,24 +28,30 @@ export default function Home() {
   });
 
   // Fetch municipality data based on selected parameter and year
-  const { 
-    data: municipalityData, 
-    isLoading: isLoadingData,
-    isError: isErrorData
-  } = useQuery({
-    queryKey: ['/api/data', selectedParameter, selectedYear],
-    queryFn: async ({ queryKey }) => {
-      const [_, parameter, year] = queryKey;
-      if (!parameter || !year) return null;
-      
-      const response = await fetch(`/api/data?parameter=${encodeURIComponent(parameter)}&year=${year}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      return response.json();
-    },
-    enabled: !!selectedParameter && !!selectedYear,
-  });
+  const {
+  data: geoData,
+  isLoading: isLoadingData,
+  isError: isErrorData,
+} = useQuery({
+  queryKey: ['/api/data', selectedParameter, selectedYear, currentZoomLevel],
+  queryFn: async ({ queryKey }) => {
+    const [_, parameter, year, zoom] = queryKey;
+    if (!parameter || !year) return null;
+
+    const url = zoom >= 9
+      ? `/api/data?parameter=${encodeURIComponent(parameter)}&year=${year}`
+      : `/api/data/regions?parameter=${encodeURIComponent(parameter)}&year=${year}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    return response.json();
+  },
+  enabled: !!selectedParameter && !!selectedYear,
+});
+
 
   // Set initial values when parameters data is loaded
   useEffect(() => {
@@ -180,7 +187,7 @@ export default function Home() {
               selectedParameter={selectedParameter}
               selectedParameterName={selectedParameterName}
               selectedYear={selectedYear}
-              stats={municipalityData?.stats}
+              stats={geoData?.stats}
               onGroupChange={handleGroupChange}
               onParameterChange={handleParameterChange}
               onYearChange={handleYearChange}
@@ -193,13 +200,14 @@ export default function Home() {
           {/* Enlarged map area */}
           <div className="h-screen md:h-[60vh] lg:h-[70vh]">
             <Map 
-              data={municipalityData?.data || []}
-              stats={municipalityData?.stats}
+              data={geoData?.data || []}
+              stats={geoData?.stats}
               selectedParameter={selectedParameterName}
               selectedParameterField={selectedParameter}
               selectedYear={selectedYear}
               isLoading={isLoadingData || isLoadingParameters}
               isError={isErrorData}
+              onZoomChange={setCurrentZoomLevel}
             />
           </div>
           
@@ -216,13 +224,13 @@ export default function Home() {
               </div>
               
               {/* Data visualization */}
-              {municipalityData && !isLoadingData && (
+              {geoData && !isLoadingData && (
                 <div>
                   <DataVisualization 
-                    data={municipalityData.data}
+                    data={geoData.data}
                     parameterName={selectedParameterName}
                     year={selectedYear}
-                    stats={municipalityData.stats}
+                    stats={geoData.stats}
                   />
                 </div>
               )}
