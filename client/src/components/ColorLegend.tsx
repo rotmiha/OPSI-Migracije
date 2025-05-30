@@ -1,6 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
 import { getColorForValue } from "@/lib/mapUtils";
 
 interface ColorLegendProps {
@@ -10,29 +7,35 @@ interface ColorLegendProps {
   year: number;
 }
 
+// Funkcija za pridobitev enote glede na parameter
+function getUnitForParameter(parameterName: string): string {
+  const units: Record<string, string> = {
+    "Povprečni dohodek": "€",
+    "Temperatura": "°C",
+    "Prebivalstvo": "",
+    "Onesnaženost": "µg/m³",
+    // Dodaj ostale parametre po potrebi
+  };
+  return units[parameterName] || "";
+}
+
 export default function ColorLegend({ min, max, parameterName, year }: ColorLegendProps) {
-  // Create formatted min and max values for display
-  const formattedMin = min !== null ? formatValue(min) : '0';
-  const middle = min !== null && max !== null ? formatValue((min + max) / 2) : '';
-  const formattedMax = max !== null ? formatValue(max) : '';
-  console.log(max);
-  // Format value based on magnitude
+  const unit = getUnitForParameter(parameterName);
+
+  // Formatiranje vrednosti z enoto
   function formatValue(value: number | null | undefined): string {
-    
-    if (value === null || value === undefined) {
-      return '-';
-    }
-    if (value >= 1000) {
-      return `${Math.round(value).toLocaleString('sl-SI')}€`;
-    } else {
-      return value.toLocaleString('sl-SI');
-    }
+    if (value === null || value === undefined) return '-';
+    return `${value.toLocaleString('sl-SI')}${unit}`;
   }
-  
-  // Generate color gradient using the same color scale as the map
+
+  const formattedMin = formatValue(min);
+  const formattedMax = formatValue(max);
+  const showMiddle = min !== null && max !== null && Math.abs(max - min) > 0.01;
+  const middle = showMiddle ? formatValue((min! + max!) / 2) : '';
+
+  // Generiranje barvnega preliva
   const generateColorGradient = () => {
     if (min === null || max === null) return [];
-    
     const steps = 10;
     const colors = [];
     for (let i = 0; i < steps; i++) {
@@ -48,31 +51,38 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
   return (
     <div className="mb-6">
       <h2 className="text-lg font-semibold mb-3 text-neutral-darkest">Barvna legenda</h2>
-      
+
       <div className="space-y-3">
         <div className="flex flex-col">
-          {/* Color gradient bar */}
+          {/* Barvni preliv */}
           <div className="flex h-6 rounded-sm overflow-hidden border border-gray-200">
             {colors.map((color, index) => (
-              <div 
-                key={index} 
-                className="flex-1" 
+              <div
+                key={index}
+                className="flex-1"
                 style={{ backgroundColor: color }}
               ></div>
             ))}
           </div>
-          
-          {/* Value labels */}
+
+          {/* Oznake vrednosti */}
           <div className="flex justify-between mt-2">
             <span className="text-xs font-medium text-neutral-dark">{formattedMin}</span>
-            {middle && (
+            {showMiddle && (
               <span className="text-xs text-neutral-dark">{middle}</span>
             )}
             <span className="text-xs font-medium text-neutral-dark">{formattedMax}</span>
           </div>
+
+          {/* Enota pod lestvico */}
+          {unit && (
+            <div className="text-xs text-neutral-dark mt-1 text-center">
+              Enota: {unit}
+            </div>
+          )}
         </div>
-        
-        {/* Parameter info */}
+
+        {/* Informacije o parametru */}
         <div className="bg-gray-50 p-3 rounded-md">
           <p className="text-sm font-medium text-neutral-darkest">{parameterName}</p>
           <p className="text-xs text-neutral-dark mt-1">Leto {year}</p>
