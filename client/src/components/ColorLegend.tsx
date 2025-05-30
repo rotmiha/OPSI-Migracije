@@ -7,16 +7,36 @@ interface ColorLegendProps {
   year: number;
 }
 
-// Funkcija za pridobitev enote glede na parameter
+// Funkcija za določanje enote glede na parameter
 function getUnitForParameter(parameterName: string): string {
-  const units: Record<string, string> = {
-    "Povprečni dohodek": "€",
-    "Temperatura": "°C",
-    "Prebivalstvo": "",
-    "Onesnaženost": "µg/m³",
-    // Dodaj ostale parametre po potrebi
-  };
-  return units[parameterName] || "";
+  const eurParameters = [
+    "Bruto dohodek - SKUPAJ",
+    "Dohodek iz dela",
+    "Starševski, družinski in socialni prejemki",
+    "Pokojnine",
+    "Dohodek iz premoženja, kapitala in drugi"
+  ];
+
+  const peopleParameters = [
+    "Izobrazba - SKUPAJ",
+    "Terciarna izobrazba",
+    "Srednješolska izobrazba",
+    "Osnovnošolska ali manj",
+    "Indeks delovne migracije",
+    "Indeks delovne migracije - moški",
+    "Indeks delovne migracije - ženske",
+    "Delovno aktivni v občini prebivališča",
+    "Delovno aktivni v občini prebivališča - moški",
+    "Delovno aktivni v občini prebivališča - ženske"
+  ];
+
+  if (eurParameters.includes(parameterName)) {
+    return "€";
+  } else if (peopleParameters.includes(parameterName)) {
+    return "ljudi";
+  }
+
+  return ""; // privzeta enota, če parameter ni prepoznan
 }
 
 export default function ColorLegend({ min, max, parameterName, year }: ColorLegendProps) {
@@ -25,7 +45,7 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
   // Formatiranje vrednosti z enoto
   function formatValue(value: number | null | undefined): string {
     if (value === null || value === undefined) return '-';
-    return `${value.toLocaleString('sl-SI')}${unit}`;
+    return `${value.toLocaleString('sl-SI')}${unit ? ` ${unit}` : ''}`;
   }
 
   const formattedMin = formatValue(min);
@@ -74,12 +94,6 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
             <span className="text-xs font-medium text-neutral-dark">{formattedMax}</span>
           </div>
 
-          {/* Enota pod lestvico */}
-          {unit && (
-            <div className="text-xs text-neutral-dark mt-1 text-center">
-              Enota: {unit}
-            </div>
-          )}
         </div>
 
         {/* Informacije o parametru */}
