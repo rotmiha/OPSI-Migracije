@@ -3,6 +3,9 @@ import ParameterSelector from "./ParameterSelector";
 import ColorLegend from "./ColorLegend";
 import DataSummary from "./DataSummary";
 import { Loader2 } from "lucide-react";
+import { BsBook} from "react-icons/bs";
+import { BsQuestionCircle } from "react-icons/bs";
+import { BsLightbulb } from "react-icons/bs";
 
 interface ControlPanelProps {
   parameterGroups: ParameterGroup[];
@@ -21,6 +24,10 @@ interface ControlPanelProps {
   onParameterChange: (parameterId: string, parameterName: string) => void;
   onYearChange: (year: number) => void;
   isLoading: boolean;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  openraz: boolean;
+  setOpenraz: (value: boolean) => void;
 }
 
 export default function ControlPanel({
@@ -31,19 +38,20 @@ export default function ControlPanel({
   selectedParameterName,
   selectedYear,
   stats,
-  
   onGroupChange,
   onParameterChange,
   onYearChange,
-  isLoading
+  isLoading,
+  open,
+  setOpen,
+  openraz,
+  setOpenraz,
 }: ControlPanelProps) {
+
+
   return (
     <div className="md:w-80 lg:w-96 border-r border-neutral-light bg-white p-4 flex flex-col h-full overflow-hidden">
       {/* Header Section */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-neutral-darkest">Zemljevid Slovenije</h1>
-        <p className="text-neutral-dark text-sm mt-1">Interaktivni prikaz podatkov po občinah</p>
-      </div>
 
       {/* Controls Area with scrollable content */}
       <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
@@ -74,8 +82,37 @@ export default function ControlPanel({
         ) : (
           stats && <DataSummary stats={stats} selectedParameterName={selectedParameterName} />
         )}
+
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex-1 flex justify-start">
+            <button 
+              className="w-11 h-11 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
+              title="Prikaži/Skrij vire"
+              onClick={() => setOpen(true)}
+            >
+              <BsBook />
+            </button>
+          </div>
+
+          <div className="flex-1 flex justify-end">
+            <button 
+              className="w-11 h-11 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
+              title="Prikaži/Skrij razlago posameznih parametrov"
+              onClick={() => setOpenraz(true)}
+            >
+              <BsQuestionCircle />
+            </button>
+          </div>
+        </div>
+
+
+
       </div>
-      
+
+
+
+
+
 
     </div>
   );

@@ -5,7 +5,11 @@ import Map from "@/components/Map";
 import DataVisualization from "@/components/DataVisualization";
 import YearSelector from "@/components/YearSelector";
 import { ParameterGroup } from "@shared/schema";
-import { Loader2 } from "lucide-react";
+import { Loader2, LucideFileChartColumnIncreasing } from "lucide-react";
+import Popup from "@/components/PopupViri";
+import { set } from "date-fns";
+import PopupPomoc from "@/components/PopupPomoc";
+import { truncateByDomain } from "recharts/types/util/ChartUtils";
 
 export default function Home() {
   // All state declarations first
@@ -17,7 +21,8 @@ export default function Home() {
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isBottomPanelVisible, setIsBottomPanelVisible] = useState<boolean>(true);
   const [currentZoomLevel, setCurrentZoomLevel] = useState<number>(8);
-
+  const [open, setOpen] = useState(false); 
+  const [openraz, setOpenraz] = useState(false); 
   // Fetch parameters and available years
   const { 
     data: parametersData, 
@@ -156,6 +161,9 @@ export default function Home() {
           {selectedParameterName || ""}
           {selectedYear && ` (${selectedYear})`}
         </h1>
+
+
+
         <div className="flex gap-2">
           <button 
             onClick={() => setIsSidebarVisible(!isSidebarVisible)}
@@ -175,6 +183,9 @@ export default function Home() {
         </div>
       </div>
 
+
+
+
       {/* Main content area with full page scrolling */}
       <div className="flex flex-col md:flex-row">
         {/* Sidebar with controls */}
@@ -192,9 +203,39 @@ export default function Home() {
               onParameterChange={handleParameterChange}
               onYearChange={handleYearChange}
               isLoading={isLoadingData}
+              open={open}
+              setOpen={setOpen}
+              openraz={openraz}
+              setOpenraz={setOpenraz}
             />
           </div>
         )}
+
+
+
+        {open && (
+        <>
+          <div className="fixed inset-0 bg-black/30 z-[9998]" />
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+            <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
+              <Popup jeOdprt={open} onZapri={() => setOpen(false)} />
+            </div>
+          </div>
+        </>
+      )}
+
+        {openraz && (
+        <>
+          <div className="fixed inset-0 bg-black/30 z-[9998]" />
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+            <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
+              <PopupPomoc jeOdprt={openraz} onZapri={() => setOpenraz(false)} />
+            </div>
+          </div>
+        </>
+      )}
+
+
 
         <div className="flex-grow flex flex-col">
           {/* Enlarged map area */}

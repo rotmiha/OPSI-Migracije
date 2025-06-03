@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import MunicipalityDetail from "./MunicipalityDetail";
 import { getColorForValue } from "@/lib/mapUtils";
+import RegijeDetail from "./RegijeDetail";
 
 interface MapProps {
   data: Array<{
@@ -92,42 +93,62 @@ export default function Map({
     };
   }, [data, stats, selectedMunicipality, currentLayer]);
 
-  const onEachFeature = useCallback((feature: any, layer: L.Layer) => {
-    const name = getFeatureName(feature);
-    const item = data?.find(d => normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === normalize(name));
-    const popup = `
-      <div><strong>${name}</strong><br/>
-      ${item?.value != null ? `${selectedParameter}: ${item.value.toLocaleString("sl-SI")}` : "Ni podatka"}</div>
-    `;
-    layer.bindTooltip(popup);
+    const onEachFeature = useCallback((feature: any, layer: L.Layer) => {
+      const name = getFeatureName(feature);
+      const item = data?.find(d => normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === normalize(name));
 
-    if (currentLayer === "municipalities") {
+      const popup = `
+        <div><strong>${name}</strong><br/>
+        ${item?.value != null ? `${selectedParameter}: ${item.value.toLocaleString("sl-SI")}` : "Ni podatka"}</div>
+      `;
+      layer.bindTooltip(popup);
+
+
+
+      console.log("onEachFeature", name, item);
       layer.on({
         click: () => {
           setSelectedMunicipality(name);
           setSelectedMunicipalityData(item);
+          console.log("Clicked:", name, item);
         },
       });
-    }
-  }, [data, selectedParameter, currentLayer]);
+    }, [data, selectedParameter, currentLayer]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!geoJsonLayerRef.current || !searchTerm) return;
+
     const layer = geoJsonLayerRef.current;
+    const normalizedSearch = normalize(searchTerm);
     let found = false;
+
     layer.eachLayer((l: any) => {
-      if (found) return;
-      const name = normalize(getFeatureName(l.feature));
-      if (name.includes(normalize(searchTerm))) {
-        setSelectedMunicipality(name);
-        const municipalityData = data?.find(
-          (item) => normalize((currentLayer === "municipalities" ? item.municipality : item.region) || "") === name
+      const featureName = normalize(getFeatureName(l.feature));
+      if (featureName.includes(normalizedSearch)) {
+        const matchedItem = data?.find(
+          (item) =>
+            normalize((currentLayer === "municipalities" ? item.municipality : item.region) || "") === featureName
         );
-        setSelectedMunicipalityData(municipalityData);
-        found = true;
+
+        if (matchedItem) {
+          setSelectedMunicipality(getFeatureName(l.feature));
+          setSelectedMunicipalityData(matchedItem);
+          found = true;
+
+          const bounds = l.getBounds?.();
+          if (bounds) l._map.fitBounds(bounds);
+
+          return;
+        }
       }
     });
+
+    if (!found) {
+      alert("Občina ni najdena. Poskusite znova.");
+      setSelectedMunicipality(null);
+      setSelectedMunicipalityData(null);
+    }
   };
 
   const handleCloseDetail = () => {
@@ -152,57 +173,130 @@ export default function Map({
     useEffect(() => {
       const initialZoom = map.getZoom();
       previousZoom.current = initialZoom;
-      if (initialZoom >= 9 && !loadedMunicipalities) {
+
+     if (!loadedMunicipalities) {
         fetch("/data/obcinepodatki.json")
           .then((res) => res.json())
           .then((data) => {
             onLoadMunicipalities(data);
             setLoadedMunicipalities(true);
-            setCurrentLayer("municipalities");
-            onLayerChange?.("municipalities");
-          });
-      } else if (!loadedRegions) {
-        fetch("/data/regije.json")
-          .then((res) => res.json())
-          .then((data) => {
-            onLoadRegions(data);
-            setLoadedRegions(true);
-            setCurrentLayer("regions");
-            onLayerChange?.("regions");
+
+            // Only switch layer AFTER data is loaded
+            if (initialZoom >= 9) {
+              setTimeout(() => {
+                setCurrentLayer("municipalities");
+                onLayerChange?.("municipalities");
+              }, 0);
+            }
           });
       }
+
+        if (!loadedRegions) {
+          fetch("/data/regije.json")
+            .then((res) => res.json())
+            .then((data) => {
+              onLoadRegions(data);
+              setLoadedRegions(true);
+
+              if (initialZoom < 9) {
+                setTimeout(() => {
+                  setCurrentLayer("regions");
+                  onLayerChange?.("regions");
+                }, 0);
+              }
+            });
+        }
     }, [map]);
+
+    useEffect(() => {
+      const ref = geoJsonLayerRef.current;
+      if (!ref) return;
+
+      ref.eachLayer((layer: any) => {
+        const feature = layer.feature;
+        if (!feature) return;
+
+        const newStyle = getStyle(feature);
+        layer.setStyle(newStyle);
+
+        const name = getFeatureName(feature);
+        const item = data?.find(d =>
+          normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === normalize(name)
+        );
+
+        const popup = `
+          <div><strong>${name}</strong><br/>
+          ${item?.value != null ? `${selectedParameter}: ${item.value.toLocaleString("sl-SI")}` : "Ni podatka"}</div>
+        `;
+        layer.unbindTooltip();
+        layer.bindTooltip(popup);
+      });
+    }, [data, stats, selectedParameter, selectedMunicipality, currentLayer, getStyle]);
+
+
+    useEffect(() => {
+      if (!selectedMunicipality) {
+        setSelectedMunicipalityData(null);
+        return;
+      }
+
+      const match = data.find(d => {
+        const name = normalize(selectedMunicipality);
+        const source = currentLayer === "municipalities" ? d.municipality : d.region;
+        return normalize(source || "") === name;
+      });
+
+      setSelectedMunicipalityData(match || null);
+    }, [selectedMunicipality, currentLayer, data]);
+
+
+
+    useEffect(() => {
+      if (currentLayer !== "municipalities") {
+        geoJsonLayerRef.current = null;
+      }
+    }, [currentLayer]);
 
     useMapEvents({
       zoomend: () => {
         const zoom = map.getZoom();
         if (onZoomChange) onZoomChange(zoom);
 
-        if (zoom < 9 && previousZoom.current >= 9 && currentLayer !== "regions") {
-          if (!loadedRegions) {
-            fetch("/data/regije.json")
-              .then((res) => res.json())
-              .then((data) => {
-                onLoadRegions(data);
-                setLoadedRegions(true);
-              });
+          if (zoom < 9 && previousZoom.current >= 9 && currentLayer !== "regions") {
+            if (!loadedRegions) {
+              fetch("/data/regije.json")
+                .then((res) => res.json())
+                .then((data) => {
+                  onLoadRegions(data);
+                  setLoadedRegions(true);
+                  setTimeout(() => {
+                    setCurrentLayer("regions");
+                    onLayerChange?.("regions");
+                  }, 0);
+                });
+            } else {
+              setCurrentLayer("regions");
+              onLayerChange?.("regions");
+            }
           }
-          setCurrentLayer("regions");
-          onLayerChange?.("regions");
-        }
 
-        if (zoom >= 9 && previousZoom.current < 9 && currentLayer !== "municipalities") {
-          if (!loadedMunicipalities) {
-            fetch("/data/obcinepodatki.json")
-              .then((res) => res.json())
-              .then((data) => {
-                onLoadMunicipalities(data);
-                setLoadedMunicipalities(true);
-              });
-          }
-          setCurrentLayer("municipalities");
-          onLayerChange?.("municipalities");
-        }
+          if (zoom >= 9 && previousZoom.current < 9 && currentLayer !== "municipalities") {
+            if (!loadedMunicipalities) {
+              fetch("/data/obcinepodatki.json")
+                .then((res) => res.json())
+                .then((data) => {
+                  onLoadMunicipalities(data);
+                  setLoadedMunicipalities(true);
+                  setTimeout(() => {
+                    setCurrentLayer("municipalities");
+                    onLayerChange?.("municipalities");
+                  }, 0);
+                });
+            } else {
+              setCurrentLayer("municipalities");
+              onLayerChange?.("municipalities");
+            }
+}
 
         previousZoom.current = zoom;
       },
@@ -275,6 +369,7 @@ export default function Map({
 
           {sloveniaGeoJson && currentLayer === "municipalities" && (
             <GeoJSON
+              key="municipalities"
               data={sloveniaGeoJson}
               style={getStyle}
               onEachFeature={onEachFeature}
@@ -284,9 +379,11 @@ export default function Map({
 
           {regijeGeoJson && currentLayer === "regions" && (
             <GeoJSON
+              key="regions"
               data={regijeGeoJson}
               style={getStyle}
               onEachFeature={onEachFeature}
+              ref={geoJsonLayerRef}
             />
           )}
 
@@ -304,6 +401,22 @@ export default function Map({
             onClose={handleCloseDetail}
           />
         )}
+
+
+         {currentLayer === "regions" && selectedMunicipality && selectedMunicipalityData && (
+           console.log("Rendering RegijeDetail", selectedMunicipality, selectedMunicipalityData),
+          <RegijeDetail
+            imeregije={selectedMunicipality}
+            data={selectedMunicipalityData}
+            parameterName={selectedParameter}
+            year={selectedYear}
+            stats={stats}
+            onClose={handleCloseDetail}
+          />
+        )}
+
+
+
 
         {isLoading && (
           <div className="absolute inset-0 bg-white bg-opacity-80 flex justify-center items-center">
