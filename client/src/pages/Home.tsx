@@ -10,19 +10,22 @@ import Popup from "@/components/PopupViri";
 import { set } from "date-fns";
 import PopupPomoc from "@/components/PopupPomoc";
 import { truncateByDomain } from "recharts/types/util/ChartUtils";
+import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 export default function Home() {
   // All state declarations first
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
   const [selectedParameter, setSelectedParameter] = useState<string>("");
   const [selectedParameterName, setSelectedParameterName] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(2023);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isBottomPanelVisible, setIsBottomPanelVisible] = useState<boolean>(true);
   const [currentZoomLevel, setCurrentZoomLevel] = useState<number>(8);
   const [open, setOpen] = useState(false); 
   const [openraz, setOpenraz] = useState(false); 
+
+  const [isDataVizPopupOpen, setIsDataVizPopupOpen] = useState(false);
   // Fetch parameters and available years
   const { 
     data: parametersData, 
@@ -73,18 +76,32 @@ export default function Home() {
     }
   }, [parametersData, selectedGroupId]);
 
-  // Update available years when parameter group changes
-  useEffect(() => {
-    if (parametersData?.availableYears && selectedParameter) {
-      const years = parametersData.availableYears[selectedParameter] || [];
-      setAvailableYears(years);
-      
-      // Set the latest year as default if no year is selected
-      if (years.length > 0 && !selectedYear) {
-        setSelectedYear(Math.max(...years));
-      }
-    }
-  }, [selectedParameter, parametersData, selectedYear]);
+      function getClosestYearBefore(years: number[], targetYear: number): number | null {
+          // Filter years strictly less than targetYear
+          const possibleYears = years.filter(y => y < targetYear);
+          if (possibleYears.length > 0) {
+            // Return the closest (max of filtered)
+            return Math.max(...possibleYears);
+          } else {
+            // fallback to smallest year or null if empty
+            return years.length > 0 ? Math.min(...years) : null;
+          }
+        }
+
+      useEffect(() => {
+          if (parametersData?.availableYears && selectedParameter) {
+            const years = parametersData.availableYears[selectedParameter] || [];
+            setAvailableYears(years);
+
+            if (years.length > 0) {
+              const targetYear = 2025; // fixed target year
+              const closestYear = getClosestYearBefore(years, targetYear);
+              setSelectedYear(closestYear);
+            } else {
+              setSelectedYear(null);
+            }
+          }
+        }, [selectedParameter, parametersData]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -122,6 +139,10 @@ export default function Home() {
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
+
+    if(year == 2025 || year == 2026 || year == 2027) {
+      console.log("Izbrano leto niso realna");
+    }
   };
 
   // Loading state
@@ -153,132 +174,132 @@ export default function Home() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with dynamic title */}
-      <div className="bg-white border-b border-neutral-light p-4 flex justify-between items-center sticky top-0 z-40">
-        <h1 className="text-2xl font-semibold text-neutral-darkest">
-          {selectedParameterName || ""}
-          {selectedYear && ` (${selectedYear})`}
-        </h1>
+return (
+  <div className="h-screen flex flex-col">
+    {/* Header */}
+    <div className="bg-white border-b border-neutral-light p-4 flex justify-between items-center">
+      <h1 className="text-2xl font-semibold text-neutral-darkest">
+        {selectedParameterName || ""}
+        {selectedYear && ` (${selectedYear})`}
+      </h1>
 
-
-
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-            className="px-3 py-2 bg-primary text-white rounded text-sm"
-            title="Skrij/prikaži levi meni (tipka L)"
-          >
-            {isSidebarVisible ? '←' : '→'}
-          </button>
-          <button 
-            onClick={() => setIsBottomPanelVisible(!isBottomPanelVisible)}
-            className="px-3 py-2 text-white rounded text-sm"
-            title="Skrij/prikaži spodnji meni (tipka B)"
-            style={{ backgroundColor: isBottomPanelVisible ? '#4A90E2' : '#7F8C8D' }}
-          >
-            {isBottomPanelVisible ? '↓' : '↑'}
-          </button>
-        </div>
-      </div>
-
-
-
-
-      {/* Main content area with full page scrolling */}
-      <div className="flex flex-col md:flex-row">
-        {/* Sidebar with controls */}
-        {isSidebarVisible && (
-          <div className="w-full md:w-80 lg:w-96 border-r border-neutral-light bg-white md:sticky md:top-16 md:h-screen md:overflow-y-auto">
-            <ControlPanel 
-              parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
-              availableYears={availableYears}
-              selectedGroupId={selectedGroupId}
-              selectedParameter={selectedParameter}
-              selectedParameterName={selectedParameterName}
-              selectedYear={selectedYear}
-              stats={geoData?.stats}
-              onGroupChange={handleGroupChange}
-              onParameterChange={handleParameterChange}
-              onYearChange={handleYearChange}
-              isLoading={isLoadingData}
-              open={open}
-              setOpen={setOpen}
-              openraz={openraz}
-              setOpenraz={setOpenraz}
-            />
-          </div>
-        )}
-
-
-
-        {open && (
-        <>
-          <div className="fixed inset-0 bg-black/30 z-[9998]" />
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-            <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
-              <Popup jeOdprt={open} onZapri={() => setOpen(false)} />
-            </div>
-          </div>
-        </>
+      {[2025, 2026, 2027].includes(selectedYear ?? 0) && (
+        <span className="text-sm text-red-600 font-bold">
+          Podatki za to leto niso zanesljivi.
+        </span>
       )}
 
-        {openraz && (
-        <>
-          <div className="fixed inset-0 bg-black/30 z-[9998]" />
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-            <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
-              <PopupPomoc jeOdprt={openraz} onZapri={() => setOpenraz(false)} />
-            </div>
-          </div>
-        </>
-      )}
-
-
-
-        <div className="flex-grow flex flex-col">
-          {/* Enlarged map area */}
-          <div className="h-screen md:h-[60vh] lg:h-[70vh]">
-            <Map 
-              data={geoData?.data || []}
-              stats={geoData?.stats}
-              selectedParameter={selectedParameterName}
-              selectedParameterField={selectedParameter}
-              selectedYear={selectedYear}
-              isLoading={isLoadingData || isLoadingParameters}
-              isError={isErrorData}
-              onZoomChange={setCurrentZoomLevel}
-            />
-          </div>
-          
-          {/* Year selector and data visualization */}
-          {isBottomPanelVisible && (
-            <div className="bg-white border-t border-neutral-light">
-              {/* Year selector */}
-              <div className="p-4 border-b border-neutral-light">
-                <YearSelector 
-                  availableYears={availableYears}
-                  selectedYear={selectedYear}
-                  onYearChange={handleYearChange}
-                />
-              </div>
-              
-              {/* Data visualization */}
-              {geoData && !isLoadingData && (
-                <div>
-                  <DataVisualization 
-                    data={geoData.data}
-                    parameterName={selectedParameterName}
-                    year={selectedYear}
-                    stats={geoData.stats}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+      <div className="flex gap-2">
+        <button onClick={() => setIsSidebarVisible(!isSidebarVisible)} className="px-3 py-2 bg-primary text-white rounded text-sm">
+          {isSidebarVisible ? '←' : '→'}
+        </button>
+        <button onClick={() => setIsBottomPanelVisible(!isBottomPanelVisible)} className="px-3 py-2 text-white rounded text-sm" style={{ backgroundColor: isBottomPanelVisible ? '#4A90E2' : '#7F8C8D' }}>
+          {isBottomPanelVisible ? '↓' : '↑'}
+        </button>
       </div>
     </div>
-  );
+
+    {/* Main content: sidebar + map */}
+    <div className="flex flex-grow overflow-hidden">
+      {/* Sidebar */}
+      {isSidebarVisible && (
+         <div className="w-full md:w-80 lg:w-96 h-screen overflow-hidden border-r border-neutral-light bg-white">
+          <ControlPanel
+            parameterGroups={parametersData?.parameterGroups as ParameterGroup[]}
+            availableYears={availableYears}
+            selectedGroupId={selectedGroupId}
+            selectedParameter={selectedParameter}
+            selectedParameterName={selectedParameterName}
+            selectedYear={selectedYear}
+            stats={geoData?.stats}
+            onGroupChange={handleGroupChange}
+            onParameterChange={handleParameterChange}
+            onYearChange={handleYearChange}
+            isLoading={isLoadingData}
+            open={open}
+            setOpen={setOpen}
+            openraz={openraz}
+            setOpenraz={setOpenraz}
+            setIsDataVizPopupOpen={setIsDataVizPopupOpen}
+          />
+        </div>
+      )}
+
+      {/* Map + bottom panel */}
+      <div className="flex flex-col flex-grow">
+        <div className="flex-grow">
+          <Map
+            data={geoData?.data || []}
+            stats={geoData?.stats}
+            selectedParameter={selectedParameterName}
+            selectedParameterField={selectedParameter}
+            selectedYear={selectedYear}
+            isLoading={isLoadingData || isLoadingParameters}
+            isError={isErrorData}
+            onZoomChange={setCurrentZoomLevel}
+          />
+        </div>
+
+        {/* Bottom panel (fixed height) */}
+        {isBottomPanelVisible && (
+        <div className="bg-white border-t border-neutral-light flex-shrink-0">
+          <div className="p-4">
+            <YearSelector
+              availableYears={availableYears}
+              selectedYear={selectedYear}
+              onYearChange={handleYearChange}
+            />
+          </div>
+        </div>
+      )}
+
+      </div>
+    </div>
+
+    {/* Modals */}
+    {open && (
+      <>
+        <div className="fixed inset-0 bg-black/30 z-[9998]" />
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+          <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
+            <Popup jeOdprt={open} onZapri={() => setOpen(false)} />
+          </div>
+        </div>
+      </>
+    )}
+
+    {openraz && (
+      <>
+        <div className="fixed inset-0 bg-black/30 z-[9998]" />
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+          <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
+            <PopupPomoc jeOdprt={openraz} onZapri={() => setOpenraz(false)} />
+          </div>
+        </div>
+      </>
+    )}
+
+    {/* Data Visualization */}
+    {isDataVizPopupOpen && geoData && !isLoadingData && (
+      <>
+        <div className="fixed inset-0 bg-black/30 z-[9998]" onClick={() => setIsDataVizPopupOpen(false)} />
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative" onClick={(e) => e.stopPropagation()}>
+            <button className="absolute top-2 right-2 text-gray-600 hover:text-gray-900" onClick={() => setIsDataVizPopupOpen(false)} aria-label="Close popup">
+              ✕
+            </button>
+            <DataVisualization
+              data={geoData.data}
+              parameterName={selectedParameterName}
+              year={selectedYear}
+              stats={geoData.stats}
+            />
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+);
+
+
 }

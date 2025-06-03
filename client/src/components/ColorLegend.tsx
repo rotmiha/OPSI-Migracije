@@ -42,7 +42,6 @@ function getUnitForParameter(parameterName: string): string {
 export default function ColorLegend({ min, max, parameterName, year }: ColorLegendProps) {
   const unit = getUnitForParameter(parameterName);
 
-  // Formatiranje vrednosti z enoto
   function formatValue(value: number | null | undefined): string {
     if (value === null || value === undefined) return '-';
     return `${value.toLocaleString('sl-SI')}${unit ? ` ${unit}` : ''}`;
@@ -53,10 +52,21 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
   const showMiddle = min !== null && max !== null && Math.abs(max - min) > 0.01;
   const middle = showMiddle ? formatValue((min! + max!) / 2) : '';
 
-  // Generiranje barvnega preliva
+  const isUnreliableYear = year >= 2025 && year <= 2027;
+
   const generateColorGradient = () => {
     if (min === null || max === null) return [];
     const steps = 10;
+
+    if (isUnreliableYear) {
+      // Red shades for unreliable data
+      return [
+        "#ffe5e5", "#ffcccc", "#ffb3b3", "#ff9999", "#ff8080",
+        "#ff6666", "#ff4d4d", "#ff3333", "#ff1a1a", "#e60000"
+      ];
+    }
+
+    // Normal gradient from getColorForValue
     const colors = [];
     for (let i = 0; i < steps; i++) {
       const value = min + (max - min) * (i / (steps - 1));
@@ -93,13 +103,17 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
             )}
             <span className="text-xs font-medium text-neutral-dark">{formattedMax}</span>
           </div>
-
         </div>
 
         {/* Informacije o parametru */}
         <div className="bg-gray-50 p-3 rounded-md">
           <p className="text-sm font-medium text-neutral-darkest">{parameterName}</p>
           <p className="text-xs text-neutral-dark mt-1">Leto {year}</p>
+          {isUnreliableYear && (
+            <p className="text-xs text-red-600 mt-1 font-semibold">
+              Podatki za to leto niso zanesljivi.
+            </p>
+          )}
         </div>
       </div>
     </div>

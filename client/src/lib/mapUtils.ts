@@ -1,4 +1,4 @@
-// Define color scale for the map
+// Define discrete color scale for the default palette (blue shades)
 const colors = [
   "#e6f2ff",  // lightest blue
   "#cce5ff",
@@ -12,18 +12,34 @@ const colors = [
 ];
 
 /**
- * Get a color from the color scale based on a value and the min/max range
+ * Get a color from the color scale or gradient based on a value and the min/max range.
+ * Supports two palettes: "default" (discrete blue scale) and "red" (smooth red gradient).
  */
-export function getColorForValue(value: number, min: number, max: number): string {
-  // If min and max are the same, return a middle color
-  if (min === max) return colors[Math.floor(colors.length / 2)];
-  
-  // Calculate the normalized position in the range (0 to 1)
-  const normalized = (value - min) / (max - min);
-  
-  // Get the corresponding color index
-  const index = Math.min(Math.floor(normalized * colors.length), colors.length - 1);
-  
+export function getColorForValue(
+  value: number, 
+  min: number, 
+  max: number, 
+  palette: "default" | "red" = "default"
+): string {
+  // Handle edge case where min == max
+  if (min === max) {
+    if (palette === "red") {
+      return `rgba(255, 200, 200, 1)`; // light red
+    }
+    return colors[Math.floor(colors.length / 2)]; // middle blue
+  }
+
+  // Normalize and clamp value between 0 and 1
+  const ratio = (value - min) / (max - min);
+  const clamp = Math.max(0, Math.min(1, ratio));
+
+  if (palette === "red") {
+    // Smooth red gradient from light pink to bright red
+    return `rgba(255, ${Math.round(200 - 150 * clamp)}, ${Math.round(200 - 150 * clamp)}, 1)`;
+  }
+
+  // Default palette: discrete blue scale
+  const index = Math.floor(clamp * (colors.length - 1));
   return colors[index];
 }
 

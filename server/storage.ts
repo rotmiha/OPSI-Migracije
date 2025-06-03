@@ -17,7 +17,7 @@ export class MemStorage implements IStorage {
 
   async initializeData(): Promise<void> {
     try {
-      const csvFilePath = path.resolve(process.cwd(), 'attached_assets', 'prebivalstvo_zdruzeno.csv');
+      const csvFilePath = path.resolve(process.cwd(), 'attached_assets', 'Obcine_z_napovedjo.csv');
       const rawData = await parseCsvFile(csvFilePath);
       
       this.municipalityData = rawData;

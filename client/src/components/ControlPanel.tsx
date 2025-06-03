@@ -2,10 +2,11 @@ import { ParameterGroup } from "@shared/schema";
 import ParameterSelector from "./ParameterSelector";
 import ColorLegend from "./ColorLegend";
 import DataSummary from "./DataSummary";
-import { Loader2 } from "lucide-react";
+import { Loader2, LucideFileChartColumnIncreasing } from "lucide-react";
 import { BsBook} from "react-icons/bs";
 import { BsQuestionCircle } from "react-icons/bs";
 import { BsLightbulb } from "react-icons/bs";
+import { BsBarChartLine } from "react-icons/bs";
 
 interface ControlPanelProps {
   parameterGroups: ParameterGroup[];
@@ -28,6 +29,8 @@ interface ControlPanelProps {
   setOpen: (value: boolean) => void;
   openraz: boolean;
   setOpenraz: (value: boolean) => void;
+  setIsDataVizPopupOpen: (value: boolean) => void;
+  
 }
 
 export default function ControlPanel({
@@ -46,6 +49,7 @@ export default function ControlPanel({
   setOpen,
   openraz,
   setOpenraz,
+  setIsDataVizPopupOpen,
 }: ControlPanelProps) {
 
 
@@ -94,6 +98,20 @@ export default function ControlPanel({
             </button>
           </div>
 
+
+
+          <div className="flex-1 flex justify-center">
+            <button 
+              className="w-11 h-11 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
+              title="Prikaži/Skrij vizualizacijo podatkov"
+             onClick={() => setIsDataVizPopupOpen(true)}
+            >
+              <BsBarChartLine />
+            </button>
+          </div>
+
+
+
           <div className="flex-1 flex justify-end">
             <button 
               className="w-11 h-11 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
@@ -103,12 +121,15 @@ export default function ControlPanel({
               <BsQuestionCircle />
             </button>
           </div>
+
+
+
+
         </div>
 
 
 
       </div>
-
 
 
 

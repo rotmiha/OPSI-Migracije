@@ -24,7 +24,7 @@ export class MemStorageReg implements IStorageReg {
 
   async initializeData(): Promise<void> {
     try {
-      const csvFilePath = path.resolve(process.cwd(), 'attached_assets', 'podatkiRegije_zdruzeno.csv');
+      const csvFilePath = path.resolve(process.cwd(), 'attached_assets', 'Regije_z_napovedjo.csv');
       const rawData = await parseCsvFile(csvFilePath);
 
       this.regionData = rawData;

@@ -76,22 +76,31 @@ export default function Map({
     return "";
   };
 
-  const getStyle = useCallback((feature: any) => {
-    const name = normalize(getFeatureName(feature));
-    const item = data?.find(d => normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === name);
-    const value = item?.value;
-    const min = stats?.min || 0;
-    const max = stats?.max || 100;
-    const fillColor = value != null ? getColorForValue(value, min, max) : currentLayer === "municipalities" ? "#f7f7f7" : "#ececec";
+const getStyle = useCallback((feature: any) => {
+  const name = normalize(getFeatureName(feature));
+  const item = data?.find(d =>
+    normalize((currentLayer === "municipalities" ? d.municipality : d.region) || "") === name
+  );
+  const value = item?.value;
+  const min = stats?.min || 0;
+  const max = stats?.max || 100;
 
-    return {
-      fillColor,
-      weight: currentLayer === "municipalities" && name === normalize(selectedMunicipality || "") ? 2 : 1,
-      opacity: 1,
-      color: currentLayer === "municipalities" && name === normalize(selectedMunicipality || "") ? "#252423" : "#999",
-      fillOpacity: currentLayer === "municipalities" ? 0.7 : 0.6,
-    };
-  }, [data, stats, selectedMunicipality, currentLayer]);
+  const useRedPalette = selectedYear !== null && selectedYear > 2024;
+
+  const fillColor = value != null
+    ? getColorForValue(value, min, max, useRedPalette ? "red" : "default")
+    : currentLayer === "municipalities"
+      ? "#f7f7f7"
+      : "#ececec";
+
+  return {
+    fillColor,
+    weight: currentLayer === "municipalities" && name === normalize(selectedMunicipality || "") ? 2 : 1,
+    opacity: 1,
+    color: currentLayer === "municipalities" && name === normalize(selectedMunicipality || "") ? "#252423" : "#999",
+    fillOpacity: currentLayer === "municipalities" ? 0.7 : 0.6,
+  };
+}, [data, stats, selectedMunicipality, currentLayer, selectedYear]);
 
     const onEachFeature = useCallback((feature: any, layer: L.Layer) => {
       const name = getFeatureName(feature);
@@ -208,11 +217,11 @@ export default function Map({
         }
     }, [map]);
 
-    useEffect(() => {
-      const ref = geoJsonLayerRef.current;
-      if (!ref) return;
 
-      ref.eachLayer((layer: any) => {
+    useEffect(() => {
+      if (!geoJsonLayerRef.current) return;
+
+      geoJsonLayerRef.current.eachLayer((layer: any) => {
         const feature = layer.feature;
         if (!feature) return;
 
@@ -231,8 +240,7 @@ export default function Map({
         layer.unbindTooltip();
         layer.bindTooltip(popup);
       });
-    }, [data, stats, selectedParameter, selectedMunicipality, currentLayer, getStyle]);
-
+    }, [data, stats, selectedParameter, currentLayer, getStyle]);
 
     useEffect(() => {
       if (!selectedMunicipality) {
