@@ -88,25 +88,27 @@ export default function ControlPanel({
         )}
 
         <div className="flex items-center justify-between mt-4">
+          
+          
+          
           <div className="flex-1 flex justify-start">
-            <button 
-              className="w-11 h-11 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
-              title="Prikaži/Skrij vire"
-              onClick={() => setOpen(true)}
-            >
-              <BsBook />
-            </button>
-          </div>
-
-
-
-          <div className="flex-1 flex justify-center">
             <button 
               className="w-11 h-11 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
               title="Prikaži/Skrij vizualizacijo podatkov"
              onClick={() => setIsDataVizPopupOpen(true)}
             >
               <BsBarChartLine />
+            </button>
+          </div>
+
+
+          <div className="flex-1 flex justify-center">
+            <button 
+              className="w-11 h-11 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
+              title="Prikaži/Skrij vire"
+              onClick={() => setOpen(true)}
+            >
+              <BsBook />
             </button>
           </div>
 

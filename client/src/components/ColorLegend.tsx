@@ -22,9 +22,6 @@ function getUnitForParameter(parameterName: string): string {
     "Terciarna izobrazba",
     "Srednješolska izobrazba",
     "Osnovnošolska ali manj",
-    "Indeks delovne migracije",
-    "Indeks delovne migracije - moški",
-    "Indeks delovne migracije - ženske",
     "Delovno aktivni v občini prebivališča",
     "Delovno aktivni v občini prebivališča - moški",
     "Delovno aktivni v občini prebivališča - ženske"

@@ -77,7 +77,10 @@ const Popup = ({ jeOdprt, onZapri}: PopupProps) => {
                   Statistični urad Republike Slovenije, dostop 23. 5. 2025, licenca: CC BY 4.0
                 </li>
               </ul>
-
+              <br></br>
+              <p className="text-sm text-neutral-dark mb-4 ">
+                 <b>Podatki so pridobljeni iz javno dostopnih virov in so namenjeni zgolj informativnim namenom. 
+                Za točnost in ažurnost podatkov ne odgovarjamo.</b>  </p>
               {/* Close button */}
               <div className="mt-4 text-right">
                 <Button onClick={onZapri} size="sm" variant="secondary">Zapri</Button>

@@ -184,7 +184,7 @@ return (
       </h1>
 
       {[2025, 2026, 2027].includes(selectedYear ?? 0) && (
-        <span className="text-sm text-red-600 font-bold">
+        <span className="text-xl text-red-600 font-bold">
           Podatki za to leto niso zanesljivi.
         </span>
       )}
