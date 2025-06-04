@@ -362,6 +362,7 @@ const getStyle = useCallback((feature: any) => {
           style={{ height: "100%", width: "100%" }}
           zoomControl={false}
           scrollWheelZoom
+          data-testid="leaflet-map"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

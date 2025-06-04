@@ -86,6 +86,7 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
             {colors.map((color, index) => (
               <div
                 key={index}
+                role="presentation"
                 className="flex-1"
                 style={{ backgroundColor: color }}
               ></div>
