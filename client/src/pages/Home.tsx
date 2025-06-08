@@ -185,7 +185,7 @@ return (
 
       {[2025, 2026, 2027].includes(selectedYear ?? 0) && (
         <span className="text-xl text-red-600 font-bold">
-          Podatki za to leto niso zanesljivi.
+          Podatki za to leto so napovedani na podlagi našega napovednega modela.
         </span>
       )}
 
