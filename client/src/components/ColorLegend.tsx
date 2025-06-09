@@ -109,7 +109,7 @@ export default function ColorLegend({ min, max, parameterName, year }: ColorLege
           <p className="text-xs text-neutral-dark mt-1">Leto {year}</p>
           {isUnreliableYear && (
             <p className="text-xs text-red-600 mt-1 font-semibold">
-              Podatki za to leto niso zanesljivi.
+              Podatki za to leto so napovedani na podlagi našega napovednega modela.
             </p>
           )}
         </div>
