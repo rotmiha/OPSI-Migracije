@@ -79,7 +79,6 @@ Aplikacija prikazuje različne kategorije podatkov za slovenske občine:
 
 ```bash
 git clone [URL_REPOZITORIJA]
-cd interactive-slovenia-map
 ```
 
 2. **Namesti odvisnosti**
@@ -98,15 +97,6 @@ npm start
 4. **Odpri aplikacijo**
    Pojdi na `http://localhost:5000` v spletnem brskalniku.
 
-### Docker namestitev
-
-```bash
-# Zgradi Docker sliko
-docker build -t slovenia-map .
-
-# Zaženi kontejner
-docker run -p 5000:5000 slovenia-map
-```
 
 ## 🎯 Uporaba
 
@@ -218,11 +208,3 @@ Ta projekt je licenciran pod MIT licenco - glej [LICENSE](LICENSE) datoteko za p
 
 **Razvito z ❤️ za Slovenijo** 🇸🇮
 
-# OPSI-Migracije
-
-# Vizualizacija in iskanje po zbirki „OPSI“
-
-    Omejimo se na podatke o migraciji oseb (turistični ali za delo)
-    In preseke z njimi!
-    Iskanje in prikaz podatkov
-    https://podatki.gov.si/
