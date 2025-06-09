@@ -179,13 +179,15 @@ return (
     {/* Header */}
     <div className="bg-white border-b border-neutral-light p-4 flex justify-between items-center">
       <h1 className="text-2xl font-semibold text-neutral-darkest">
+        
+        {selectedYear > 2024 && "Napovedujemo: "}
         {selectedParameterName || ""}
         {selectedYear && ` (${selectedYear})`}
       </h1>
 
       {[2025, 2026, 2027].includes(selectedYear ?? 0) && (
         <span className="text-xl text-red-600 font-bold">
-          Podatki za to leto niso zanesljivi.
+          Napovedani podatki se lahko razlikujejo od dejanskih!
         </span>
       )}
 

@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect, useRef } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { BsGraphUpArrow } from "react-icons/bs";
+import { BsPlay, BsPauseCircle } from "react-icons/bs";
 
 interface YearSelectorProps {
   availableYears: number[];
@@ -10,62 +9,90 @@ interface YearSelectorProps {
   onYearChange: (year: number) => void;
 }
 
-export default function YearSelector({ 
-  availableYears, 
-  selectedYear, 
-  onYearChange 
+export default function YearSelector({
+  availableYears,
+  selectedYear,
+  onYearChange,
 }: YearSelectorProps) {
-  // Set min and max years from available years
-  const minYear = availableYears.length > 0 ? Math.min(...availableYears) : 2014;
-  const maxYear = availableYears.length > 0 ? Math.max(...availableYears) : 2023;
-  
-  // Set slider value based on selected year
-  const initialYear = selectedYear 
-  ?? (availableYears.includes(2024) ? 2024 
-  : availableYears.includes(2023) ? 2023 
-  : maxYear);
+  const minYear = availableYears.length ? Math.min(...availableYears) : 2014;
+  const maxYear = availableYears.length ? Math.max(...availableYears) : 2023;
+  const initialYear =
+    selectedYear ??
+    (availableYears.includes(2024)
+      ? 2024
+      : availableYears.includes(2023)
+      ? 2023
+      : maxYear);
 
-const [sliderValue, setSliderValue] = useState<number[]>([initialYear]);
+  const [sliderValue, setSliderValue] = useState<number[]>([initialYear]);
+  const [isPlaying, setIsPlaying] = useState(false);
   
-  // Update slider when selected year changes
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const indexRef    = useRef(
+    selectedYear !== null ? availableYears.indexOf(selectedYear) : 0
+  );
+
   useEffect(() => {
-    if (selectedYear) {
+    if (selectedYear !== null) {
+      indexRef.current = availableYears.indexOf(selectedYear);
       setSliderValue([selectedYear]);
     }
-  }, [selectedYear]);
-  
-  // Handle slider change
-  const handleSliderChange = (value: number[]) => {
-    const newYear = value[0];
-    setSliderValue([newYear]);
-    
-    // Find closest available year
-    if (availableYears.length > 0) {
-      const closestYear = availableYears.reduce((prev, curr) => 
-        Math.abs(curr - newYear) < Math.abs(prev - newYear) ? curr : prev
-      );
-      onYearChange(closestYear);
-    }
+  }, [selectedYear, availableYears]);
+
+  const startPlaying = () => {
+    if (isPlaying || !availableYears.length) return;
+    setIsPlaying(true);
+
+    intervalRef.current = setInterval(() => {
+      indexRef.current = (indexRef.current + 1) % availableYears.length;
+      onYearChange(availableYears[indexRef.current]);
+    }, 750);
   };
-  
-  // Handle year pill click
-  const handleYearClick = (year: number) => {
-    onYearChange(year);
+
+  const stopPlaying = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    setIsPlaying(false);
   };
-  
+
+  useEffect(() => () => stopPlaying(), []);
+
+  const handleSliderChange = ([rawValue]: number[]) => {
+    const closest = availableYears.reduce((p, c) =>
+      Math.abs(c - rawValue) < Math.abs(p - rawValue) ? c : p
+    );
+    onYearChange(closest);
+  };
+
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-semibold mb-3 text-neutral-darkest">Leto  </h2>
-      
-      {/* Year Range Display */}
+      <h2 className="text-lg font-semibold mb-3 text-neutral-darkest">Leto</h2>
+
+      {/* PLAY / PAUSE */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={startPlaying}
+          className="w-8 h-8 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
+          title="Predvajaj vizualizacijo"
+        >
+          <BsPlay />
+        </button>
+        <button
+          onClick={stopPlaying}
+          className="w-8 h-8 flex items-center justify-center bg-primary text-white rounded text-lg hover:bg-primary/80 transition"
+          title="Zaustavi vizualizacijo"
+        >
+          <BsPauseCircle />
+        </button>
+      </div>
+
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-neutral-dark">{minYear}</span>
         <span className="text-sm font-medium">{maxYear}</span>
       </div>
-      
-      {/* Year Slider */}
+
       <div className="mb-4">
-        <Slider 
+        <Slider
           value={sliderValue}
           min={minYear}
           max={maxYear}
@@ -74,28 +101,26 @@ const [sliderValue, setSliderValue] = useState<number[]>([initialYear]);
           className="w-full"
         />
       </div>
-      
-      {/* Available Years Pills */}
+
       <div className="flex flex-wrap gap-2">
         {availableYears.map((year) => (
-        <Badge 
-          key={year} 
-          variant={selectedYear === year ? "default" : "outline"}
-          className={
-            [
+         <Badge
+            key={year}
+            variant={selectedYear === year ? "default" : "outline"}
+            className={[
               "cursor-pointer",
-              selectedYear === year 
-                ? "bg-primary text-white" 
-                : "bg-primary-light text-primary hover:bg-primary hover:text-white",
-              [2025, 2026, 2027].includes(year) 
-                ? "bg-red-500 text-white hover:bg-red-600" 
-                : ""
-            ].join(" ")
-          }
-          onClick={() => handleYearClick(year)}
-        >
-          {year}
-        </Badge>
+              selectedYear === year && [2025, 2026, 2027].includes(year)
+                ? "bg-red-700 text-white"
+                : selectedYear === year
+                ? "bg-primary text-white"
+                : [2025, 2026, 2027].includes(year)
+                ? "bg-red-500 text-white hover:bg-red-600"
+                : "bg-primary-light text-primary hover:bg-primary hover:text-white"
+            ].join(" ")}
+            onClick={() => onYearChange(year)}
+          >
+            {year}
+          </Badge>
         ))}
       </div>
     </div>

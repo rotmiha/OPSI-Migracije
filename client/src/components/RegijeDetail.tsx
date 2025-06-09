@@ -115,6 +115,13 @@ export default function RegijeDetail({
           </div>
         </div>
         
+         <div className="bg-neutral-lighter px-4 py-3 flex justify-between">
+                <Button variant="ghost" size="sm" className="text-sm text-neutral-dark hover:text-primary flex items-center">
+                  <Eye className="w-4 h-4 mr-1" />
+                  Prikaži zgodovino
+                </Button>
+          </div>
+
   
       </div>
       
