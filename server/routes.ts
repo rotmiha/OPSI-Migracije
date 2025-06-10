@@ -57,6 +57,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+
+const municipalityParamSchema = z.object({
+  municipality: z.string().min(1, 'Municipality name is required'),
+  parameter: z.string().min(1, 'Parameter name is required')
+});
+
+// Helper function to normalize municipality names for comparison
+const normalizeMunicipalityName = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .trim()
+    .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+};
+
+// Helper function to find matching municipality in data
+const findMatchingMunicipality = async (searchName: string, storage: any): Promise<string | null> => {
+  const normalizedSearch = normalizeMunicipalityName(searchName);
+  
+  try {
+    // Get all unique municipalities from the data
+    const allMunicipalities = await storage.getAllMunicipalities();
+    
+    // First try exact match (normalized)
+    const exactMatch = allMunicipalities.find((mun: string) => 
+      normalizeMunicipalityName(mun) === normalizedSearch
+    );
+    
+    if (exactMatch) {
+      return exactMatch;
+    }
+    
+    // If no exact match, try partial matching
+    const partialMatch = allMunicipalities.find((mun: string) => {
+      const normalizedMun = normalizeMunicipalityName(mun);
+      const searchWords = normalizedSearch.split(' ');
+      const munWords = normalizedMun.split(' ');
+      
+      // Check if all search words are present in municipality name
+      return searchWords.every(searchWord => 
+        munWords.some(munWord => 
+          munWord.includes(searchWord) || searchWord.includes(munWord)
+        )
+      );
+    });
+    
+    return partialMatch || null;
+  } catch (error) {
+    console.error('Error finding matching municipality:', error);
+    return null;
+  }
+};
+
+// API endpoint to get all years of data for a specific municipality and parameter
+app.get('/api/municipalities/:municipality/parameters/:parameter', async (req: Request, res: Response) => {
+  try {
+    // Validate path parameters
+
+
+    console.log('Received request for municipality parameter data');
+    const paramResult = municipalityParamSchema.safeParse(req.params);
+    
+    if (!paramResult.success) {
+      return res.status(400).json({ 
+        message: 'Invalid path parameters',
+        errors: paramResult.error.errors
+      });
+    }
+    
+    // Decode URL-encoded parameters
+    const requestedMunicipality = decodeURIComponent(paramResult.data.municipality);
+    const parameter = decodeURIComponent(paramResult.data.parameter);
+    
+    console.log('Requested municipality:', requestedMunicipality);
+    console.log('Requested parameter:', parameter);
+    
+    // Find the actual municipality name in the data
+    const actualMunicipality = await findMatchingMunicipality(requestedMunicipality, storage);
+    
+    if (!actualMunicipality) {
+      return res.status(404).json({ 
+        message: 'Municipality not found',
+        requestedMunicipality,
+        suggestion: 'Check the municipality name spelling and capitalization'
+      });
+    }
+    
+    console.log('Matched municipality:', actualMunicipality);
+    
+    // Get all data for this municipality and parameter across all years
+    const data = await storage.getParameterDataForMunicipality(actualMunicipality, parameter);
+    console.log('Data found:', data.length, 'records');
+    
+    // Return structured response with both requested and actual municipality names
+    res.json({
+      municipality: actualMunicipality, // Return the actual municipality name from data
+      requestedMunicipality, // Also return what was requested for reference
+      parameter,
+      data,
+      totalRecords: data.length
+    });
+  } catch (error) {
+    console.error('Error fetching municipality parameter data:', error);
+    
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        message: 'Invalid parameters',
+        errors: error.errors
+      });
+    }
+    
+    res.status(500).json({ message: 'Failed to fetch municipality parameter data' });
+  }
+});
+
+
+
+    app.get('/api/regions/:region/parameters/:parameter', async (req: Request, res: Response) => {
+      try {
+        // Validate parameters
+        
+    console.log('Received request for municipality parameter data');
+        const paramResult = municipalityParamSchema.safeParse({
+          municipality: req.params.region,
+          parameter: req.params.parameter
+        });
+
+        if (!paramResult.success) {
+          return res.status(400).json({ 
+            message: 'Invalid path parameters',
+            errors: paramResult.error.errors
+          });
+        }
+
+        const requestedRegion = decodeURIComponent(paramResult.data.municipality); // alias reuse
+        const parameter = decodeURIComponent(paramResult.data.parameter);
+
+        console.log('Requested region:', requestedRegion);
+        console.log('Requested parameter:', parameter);
+
+        // Find actual region name
+        const actualRegion = await storageReg.findRegionByName(requestedRegion);
+
+        if (!actualRegion) {
+          return res.status(404).json({
+            message: 'Region not found',
+            requestedRegion,
+            suggestion: 'Check the region name spelling and capitalization'
+          });
+        }
+
+        console.log('Matched region:', actualRegion);
+
+        // Get parameter data across all years
+        const data = await storageReg.getParameterDataForRegion(actualRegion, parameter);
+
+        res.json({
+          region: actualRegion,
+          requestedRegion,
+          parameter,
+          data,
+          totalRecords: data.length
+        });
+      } catch (error) {
+        console.error('Error fetching region parameter data:', error);
+
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({
+            message: 'Invalid parameters',
+            errors: error.errors
+          });
+        }
+
+        res.status(500).json({ message: 'Failed to fetch region parameter data' });
+      }
+    });
+
+
+
+
   // API endpoint to get municipality data for a specific parameter and year
   app.get('/api/data', async (req: Request, res: Response) => {
     try {
