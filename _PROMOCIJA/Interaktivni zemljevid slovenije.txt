@@ -1,0 +1,22 @@
+Interaktivni zemljevid slovenije
+
+Interaktivna predstavitev slovenije preko izbranih kazalnikov
+
+Leto izdelave: 2025
+
+Avtor: Filip Rap
+Avtor: Miha Rot
+Avtor: Rene Laufer
+
+Domača stran: https://opsi-migracije-k6v4.onrender.com
+Vir podatkov: https://podatki.gov.si
+Koda: https://github.com/rotmiha/OPSI-Migracije
+
+Kategorizacija: celovita informacijska rešitev, predstavitvena spletna stran
+
+Oznake: OdprtiPodatki, React Vite, NodeJS, GitHub, Express, REST
+
+Opis:
+Projekt je spletna aplikacija za vizualizacijo in analizo regionalnih kazalnikov razvoja v Sloveniji. Glavni del predstavlja interaktivni zemljevid, ki s pomočjo knjižnice Leaflet prikazuje podatke za posamezne občine ali regije. Uporabnik lahko izbere parameter (npr. bruto dohodek) in leto prikaza, zemljevid pa se obarva glede na vrednosti, kar omogoča enostavno primerjavo prostorskih razlik.
+
+Aplikacija poleg vizualizacije ponuja tudi ključne statistike (povprečje, mediana, minimum, maksimum), časovno drsalko za spremljanje trendov ter iskalnik občin. Uporabniški vmesnik je pregleden in namenjen tako raziskovalcem kot oblikovalcem politik, saj podpira analizo regionalnih razlik in strateško načrtovanje. Projekt je odprtokoden in služi kot orodje za boljše razumevanje družbeno-ekonomskih gibanj na ravni občin in regij v Sloveniji.
